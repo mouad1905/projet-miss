@@ -1,24 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Sidebar from './component/Sidbar';
+import TypesConsommable from './pages/TypesConsommable';
+// Ajoute tes autres pages ici
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="flex">
+        <Sidebar />
+        <div className="flex-1 p-6">
+          <Routes>
+            <Route path="/" element={<div>Accueil</div>} />
+            <Route path="/dashboard" element={<div>Dashboard</div>} />
+            <Route path="/categorie-consommable" element={<TypesConsommable />} />
+            {/* Ajoute d'autres routes ici */}
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 
