@@ -1,0 +1,283 @@
+/* ConsommableList.css */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  margin: 0;
+  background-color: #f0f2f5;
+  color: #333;
+}
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 260px;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  color: #555;
+}
+
+.sidebar-header {
+  padding: 20px;
+  font-size: 1.3em;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+  color: #3A4F8A; /* Match the image's "Municipality Inventory" color */
+}
+
+.sidebar-nav {
+  flex-grow: 1;
+  padding-top: 15px;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav li a {
+  display: flex; /* Use flex for icon alignment */
+  align-items: center;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #555;
+  font-size: 0.95em;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-nav li a .icon {
+  margin-right: 10px;
+  font-size: 1.1em;
+}
+
+
+.sidebar-nav li.active > a, /* For parent active items */
+.sidebar-nav li ul.submenu li.active a /* For specific active sub-items */
+{
+  background-color: #e6f0ff; /* Light blue background for active item */
+  color: #3A4F8A; /* Darker blue text for active item */
+  font-weight: 600;
+  border-left: 3px solid #3A4F8A;
+  padding-left: 17px; /* Adjust padding to account for border */
+}
+
+.sidebar-nav li a:hover {
+  background-color: #f0f0f0;
+}
+
+.sidebar-nav li.active-parent > a {
+ font-weight: bold;
+}
+
+.sidebar-nav ul.submenu {
+  padding-left: 20px; /* Indent submenu items */
+  background-color: #fafafa; /* Slightly different background for submenu */
+}
+
+.sidebar-nav ul.submenu li a {
+  padding: 10px 20px 10px 15px; /* Adjust padding for submenu items */
+  font-size: 0.9em;
+}
+
+
+.sidebar-user-profile {
+  padding: 15px 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Space between icons */
+}
+
+.sidebar-user-profile .icon {
+  font-size: 1.5em;
+  color: #6c757d;
+  cursor: pointer;
+}
+
+.notification-badge {
+  background-color: #dc3545;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.7em;
+  position: relative;
+  top: -8px;
+  right: 8px;
+}
+
+
+/* Main Content Styles */
+.main-content {
+  flex-grow: 1;
+  padding: 20px 30px;
+  background-color: #fff; /* Main content area background */
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.content-header h1 {
+  font-size: 1.8em;
+  color: #333;
+  margin: 0;
+  font-weight: 600;
+}
+
+.btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #3A4F8A; /* Dark blue from image */
+  color: white;
+}
+.btn-primary:hover {
+  background-color: #2e3f6e;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+.btn-success:hover {
+  background-color: #1e7e34;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+.btn-danger:hover {
+  background-color: #b02a37;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+.btn-secondary:hover {
+  background-color: #545b62;
+}
+.btn-secondary:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+}
+
+
+.controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 0.9em;
+}
+
+.entries-selector select,
+.search-bar input[type="text"] {
+  padding: 6px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  margin-left: 5px;
+  font-size: 0.95em;
+}
+
+.search-bar input[type="text"] {
+  width: 200px;
+}
+
+
+.table-container {
+  overflow-x: auto; /* For responsive tables if they get too wide */
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 0.95em;
+}
+
+th {
+  background-color: #f8f9fa; /* Light grey background for table header */
+  font-weight: 600;
+  color: #495057;
+}
+
+.sort-arrow {
+  color: #adb5bd;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover {
+  background-color: #f1f3f5;
+}
+
+
+.content-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  font-size: 0.9em;
+  color: #6c757d;
+}
+
+.pagination-controls .btn {
+  margin: 0 3px;
+}
+
+.pagination-controls .btn-page.active {
+  background-color: #3A4F8A;
+  color: white;
+  border: 1px solid #3A4F8A;
+}
+.pagination-controls .btn-page:not(.active) {
+  background-color: #fff;
+  color: #3A4F8A;
+  border: 1px solid #dee2e6;
+}
+.pagination-controls .btn-page:not(.active):hover {
+  background-color: #f0f0f0;
+}
+
+
+.export-buttons .btn {
+  margin-left: 10px;
+}
+
+.icon { /* Basic styling for text icons, replace with your icon library if needed */
+  display: inline-block;
+}

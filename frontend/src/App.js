@@ -1,24 +1,23 @@
+// App.js ou un composant de layout
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sidebar from './component/Sidbar';
-import TypesConsommable from './pages/TypesConsommable';
-// Ajoute tes autres pages ici
+import SidebarComponent from './component/Sidbar';
+import './css/Sidebar.css';
+import './css/ConsommableList.css' // Ajustez le chemin si nécessaire
+// import MainContentComponent from './MainContentComponent'; // Votre composant de contenu principal
 
 function App() {
+  // Vous pouvez passer la prop `activeItem` dynamiquement en fonction de la route actuelle
+  const currentRouteName = "Catégorie de consommable"; // Exemple
+
   return (
-    <Router>
-      <div className="flex">
-        <Sidebar />
-        <div className="flex-1 p-6">
-          <Routes>
-            <Route path="/" element={<div>Accueil</div>} />
-            <Route path="/dashboard" element={<div>Dashboard</div>} />
-            <Route path="/categorie-consommable" element={<TypesConsommable />} />
-            {/* Ajoute d'autres routes ici */}
-          </Routes>
-        </div>
-      </div>
-    </Router>
+    <div style={{ display: 'flex' }}>
+      <SidebarComponent activeItem={currentRouteName} />
+      <main style={{ marginLeft: '260px', flexGrow: 1, padding: '20px' }}>
+        {/* <MainContentComponent /> */}
+        {/* Le reste de votre application ici */}
+        Contenu principal de la page...
+      </main>
+    </div>
   );
 }
 
