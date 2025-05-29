@@ -1,15 +1,16 @@
 /* SidebarComponent.css */
 .sidebar {
-  width: 260px;
   background-color: #ffffff; /* Couleur de fond comme dans l'image */
   border-right: 1px solid #e0e0e0; /* Bordure fine à droite */
   display: flex;
   flex-direction: column;
   color: #555; /* Couleur de texte par défaut pour la sidebar */
-  height: 100vh; /* Prend toute la hauteur */
-  position: fixed; /* Pour la garder fixe lors du défilement du contenu principal */
+  position: fixed;
   left: 0;
   top: 0;
+  width: 260px;
+  height: 100vh;
+  z-index: 1000;
 }
 
 .sidebar-header {
@@ -151,4 +152,25 @@
   top: -5px; /* Ajustement pour le positionnement */
   right: -5px; /* Ajustement pour le positionnement */
   border: 1px solid white; /* Petite bordure blanche */
+}
+/* Dans Sidebar.css */
+.sidebar-icon-wrapper {
+  margin-right: 10px; /* Ou la valeur que vous aviez pour .sidebar-icon */
+  display: inline-flex; /* Pour un bon alignement vertical */
+  align-items: center;
+  font-size: 1.1em; /* Taille par défaut de l'icône */
+}
+.submenu-icon-wrapper {
+    margin-right: 8px;
+    font-size: 1em;
+}
+.chevron-icon {
+  margin-left: auto; /* Pousse le chevron à droite */
+  font-size: 1.2em; /* Ajustez la taille */
+}
+.user-actions-icon {
+  cursor: pointer;
+}
+.user-actions-icon:hover {
+  color: #3A4F8A; /* Ou votre couleur de survol */
 }

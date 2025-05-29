@@ -1,24 +1,26 @@
-// ConsommableTableComponent.jsx
+// frontend/src/pages/DivisionPageComponent.jsx
 import React, { useState } from 'react';
-// Assurez-vous que ce chemin pointe vers votre fichier CSS partagé
-import '../css/ConsommableList.css'; // ou '../css/ConsommableList.css' si vous avez mis le CSS partagé là
+// Assurez-vous que le chemin vers votre CSS partagé est correct
+import '../css/ConsommableList.css'; // Ou le nom que vous avez choisi
 
 // Optionnel: Icône pour le bouton "Ajouter"
 // import { FaPlus } from 'react-icons/fa';
 
-const ConsommableTableComponent = () => {
+const DivisionPageComponent = () => {
+  // Données d'exemple pour les divisions
   const [data, setData] = useState([
-    { id: 1, libelle: 'consommable' },
-    { id: 2, libelle: 'non consommable' },
-    // Ajoutez d'autres données si nécessaire
+    { id: 1, libelle: 'Division Technique' },
+    { id: 2, libelle: 'Division Administrative et Financière' },
+    { id: 3, libelle: 'Division des Ressources Humaines' },
+    { id: 4, libelle: 'Division Commerciale' },
   ]);
 
-  // États pour la pagination, la recherche, etc. (simplifié ici)
+  // États pour la pagination, la recherche, etc.
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Logique de filtrage et de pagination (à implémenter si nécessaire)
+  // Logique de filtrage et de pagination
   const filteredData = data.filter(item =>
     item.libelle.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -30,20 +32,19 @@ const ConsommableTableComponent = () => {
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   return (
-    // Utilisation de la classe principale du CSS partagé
-    <div className="data-table-view"> {/* Changement de 'main-content-consommable' à 'data-table-view' */}
+    <div className="data-table-view"> {/* Utilisation de la classe principale du CSS partagé */}
       <header className="content-header">
-        <h1>Liste des types de consommable</h1>
-        <button className="btn btn-primary btn-add"> {/* La classe 'btn-add' est optionnelle, pour styler spécifiquement ce bouton si besoin */}
+        <h1>Liste des divisions</h1>
+        <button className="btn btn-primary btn-add">
           {/* <FaPlus style={{ marginRight: '8px' }} /> Optionnel: Icône */}
-          + Ajouter un type de consommable
+          + Ajouter une division
         </button>
       </header>
 
       <div className="controls-bar">
         <div className="entries-selector">
           Afficher{' '}
-          <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}>
+          <select value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}>
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>
@@ -56,7 +57,7 @@ const ConsommableTableComponent = () => {
             type="text"
             placeholder="Rechercher..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
           />
         </div>
       </div>
@@ -75,22 +76,20 @@ const ConsommableTableComponent = () => {
               currentItems.map((item) => (
                 <tr key={item.id}>
                   <td>{item.libelle}</td>
-                  {/* Ajout de la classe btn-sm pour des boutons plus petits dans le tableau, comme dans les exemples précédents */}
                   <td><button className="btn btn-success btn-sm">Modifier</button></td>
                   <td><button className="btn btn-danger btn-sm">Effacer</button></td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" style={{ textAlign: 'center' }}>Aucun élément à afficher</td>
+                <td colSpan="3" style={{ textAlign: 'center' }}>Aucune division à afficher.</td> {/* colSpan est 3 ici */}
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Renommer la classe du footer pour correspondre au CSS partagé si nécessaire */}
-      <footer className="content-footer-bar"> {/* Auparavant 'content-footer', s'assurer de la cohérence avec le CSS partagé */}
+      <footer className="content-footer-bar">
         <div className="pagination-info">
           Affichage de l'élément {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} à {Math.min(indexOfLastItem, filteredData.length)} sur {filteredData.length} éléments
         </div>
@@ -124,8 +123,8 @@ const ConsommableTableComponent = () => {
           <button className="btn btn-secondary btn-sm">Export Excel</button>
         </div>
       </footer>
-    </div> // Fin de data-table-view
+    </div>
   );
 };
 
-export default ConsommableTableComponent;
+export default DivisionPageComponent;

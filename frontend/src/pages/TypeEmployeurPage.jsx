@@ -1,16 +1,17 @@
-// ConsommableTableComponent.jsx
+// frontend/src/pages/TypeEmployeurPageComponent.jsx (ou où vous placez vos pages)
 import React, { useState } from 'react';
-// Assurez-vous que ce chemin pointe vers votre fichier CSS partagé
-import '../css/ConsommableList.css'; // ou '../css/ConsommableList.css' si vous avez mis le CSS partagé là
+// Assurez-vous que le chemin vers votre CSS partagé est correct
+import '../css/TypeEmployeur.css'; // Ou le nom que vous avez choisi, ex: '../ConsommableTable.css'
 
 // Optionnel: Icône pour le bouton "Ajouter"
 // import { FaPlus } from 'react-icons/fa';
 
-const ConsommableTableComponent = () => {
+const TypeEmployeurPageComponent = () => {
+  // Données spécifiques pour les types d'employeur (issues de votre capture d'écran)
   const [data, setData] = useState([
-    { id: 1, libelle: 'consommable' },
-    { id: 2, libelle: 'non consommable' },
-    // Ajoutez d'autres données si nécessaire
+    { id: 1, libelle: 'fonctionnaire' },
+    { id: 2, libelle: 'marches' },
+    { id: 3, libelle: 'magasin' },
   ]);
 
   // États pour la pagination, la recherche, etc. (simplifié ici)
@@ -19,7 +20,7 @@ const ConsommableTableComponent = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Logique de filtrage et de pagination (à implémenter si nécessaire)
-  const filteredData = data.filter(item =>
+  const filteredData = data.filter(item => 
     item.libelle.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -30,13 +31,12 @@ const ConsommableTableComponent = () => {
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   return (
-    // Utilisation de la classe principale du CSS partagé
-    <div className="data-table-view"> {/* Changement de 'main-content-consommable' à 'data-table-view' */}
+    <div className="data-table-view"> {/* Utilisation de la classe principale du CSS */}
       <header className="content-header">
-        <h1>Liste des types de consommable</h1>
-        <button className="btn btn-primary btn-add"> {/* La classe 'btn-add' est optionnelle, pour styler spécifiquement ce bouton si besoin */}
-          {/* <FaPlus style={{ marginRight: '8px' }} /> Optionnel: Icône */}
-          + Ajouter un type de consommable
+        <h1>Liste des types d'employer</h1>
+        <button className="btn btn-primary btn-add">
+          {/* <FaPlus style={{ marginRight: '8px' }} />  Optionnel: Icône */}
+          + Ajouter un type d'employer
         </button>
       </header>
 
@@ -52,9 +52,9 @@ const ConsommableTableComponent = () => {
           éléments
         </div>
         <div className="search-bar">
-          Rechercher: <input
-            type="text"
-            placeholder="Rechercher..."
+          Rechercher: <input 
+            type="text" 
+            placeholder="Rechercher..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -75,35 +75,34 @@ const ConsommableTableComponent = () => {
               currentItems.map((item) => (
                 <tr key={item.id}>
                   <td>{item.libelle}</td>
-                  {/* Ajout de la classe btn-sm pour des boutons plus petits dans le tableau, comme dans les exemples précédents */}
                   <td><button className="btn btn-success btn-sm">Modifier</button></td>
                   <td><button className="btn btn-danger btn-sm">Effacer</button></td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="3" style={{ textAlign: 'center' }}>Aucun élément à afficher</td>
+                <td colSpan="3" style={{ textAlign: 'center' }}>Aucun type d'employer à afficher.</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Renommer la classe du footer pour correspondre au CSS partagé si nécessaire */}
-      <footer className="content-footer-bar"> {/* Auparavant 'content-footer', s'assurer de la cohérence avec le CSS partagé */}
+      <footer className="content-footer-bar">
         <div className="pagination-info">
           Affichage de l'élément {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} à {Math.min(indexOfLastItem, filteredData.length)} sur {filteredData.length} éléments
         </div>
         <div className="pagination-controls">
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          <button 
+            className="btn btn-secondary btn-sm" 
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
             disabled={currentPage === 1}
           >
             Précédent
           </button>
+          {/* Génération dynamique des numéros de page (simplifié à 1 ici) */}
           {[...Array(totalPages).keys()].map(number => (
-             <button
+             <button 
                 key={number + 1}
                 className={`btn btn-page btn-sm ${currentPage === number + 1 ? 'active' : ''}`}
                 onClick={() => setCurrentPage(number + 1)}
@@ -111,8 +110,8 @@ const ConsommableTableComponent = () => {
                 {number + 1}
              </button>
           ))}
-          <button
-            className="btn btn-secondary btn-sm"
+          <button 
+            className="btn btn-secondary btn-sm" 
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages || totalPages === 0}
           >
@@ -124,8 +123,8 @@ const ConsommableTableComponent = () => {
           <button className="btn btn-secondary btn-sm">Export Excel</button>
         </div>
       </footer>
-    </div> // Fin de data-table-view
+    </div>
   );
 };
 
-export default ConsommableTableComponent;
+export default TypeEmployeurPageComponent;
