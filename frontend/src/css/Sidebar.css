@@ -174,3 +174,31 @@
 .user-actions-icon:hover {
   color: #3A4F8A; /* Ou votre couleur de survol */
 }
+.login-branding .logo {
+  /* Anciennes valeurs possibles (exemple) */
+  /* max-width: 180px; */
+  /* max-height: 180px; */
+
+  /* Nouvelles valeurs pour agrandir le logo */
+  max-width: 800px; /* Augmentez cette valeur selon vos besoins */
+  /* ou width: 250px; si vous voulez une taille fixe */
+  
+  max-height: 800px; /* Optionnel, pour contrôler la hauteur maximale */
+  /* ou height: auto; pour maintenir les proportions si vous définissez seulement la largeur */
+
+  /* Assurez-vous que ces propriétés sont toujours là pour un bon affichage */
+  object-fit: contain; /* Important pour que l'image ne soit pas déformée si elle est dans un conteneur de taille fixe */
+  margin-bottom: 20px; /* Ou la marge que vous souhaitez */
+}
+
+/* Assurez-vous que le conteneur .login-branding peut accommoder un logo plus grand si nécessaire */
+.login-branding {
+  flex-basis: 50%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px; /* Peut nécessiter un ajustement si le logo devient très grand */
+  /* ... autres styles ... */
+}

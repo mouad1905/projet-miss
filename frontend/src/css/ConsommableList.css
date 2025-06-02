@@ -188,3 +188,50 @@ tr:hover {
 .export-buttons .btn {
   margin-left: 10px; /* Marge à gauche du premier bouton d'export */
 }
+.add-form-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.add-form-container form {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  width: 400px;
+  max-width: 90%;
+}
+
+.add-form-container .form-group {
+  margin-bottom: 15px;
+}
+
+.add-form-container label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.add-form-container input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.add-form-container .form-actions {
+  margin-top: 20px;
+  text-align: right;
+}
+.add-form-container .form-actions .btn + .btn {
+    margin-left: 10px;
+}

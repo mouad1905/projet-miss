@@ -1,0 +1,129 @@
+/* frontend/src/pages/AddUserForm.css */
+
+/* Conteneur de la page spécifique pour le formulaire d'ajout d'utilisateur */
+/* .add-user-form-page .content-header { */
+  /* Vous pouvez surcharger .content-header ici si besoin pour cette page spécifiquement */
+  /* Par exemple, si vous voulez moins de marge en bas avant le formulaire */
+  /* margin-bottom: 20px; */
+/* } */
+
+.user-form {
+  background-color: #fff; /* Fond blanc pour le formulaire */
+  padding: 25px 30px;    /* Espace intérieur */
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-light);
+  max-width: 900px; /* Augmenter la largeur maximale pour accommoder deux colonnes */
+  margin: 0 auto;   /* Centrer le formulaire sur la page */
+}
+
+.user-form .form-row {
+  display: flex;
+  flex-wrap: wrap; /* Permet aux éléments de passer à la ligne sur petits écrans */
+  gap: 20px;       /* Espace horizontal entre les groupes de champs */
+  margin-bottom: 18px; /* Espace vertical entre les lignes de champs */
+}
+
+.user-form .form-group {
+  flex: 1 1 calc(50% - 10px); /* Chaque groupe prendra environ 50% moins le gap */
+  display: flex;
+  flex-direction: column;
+  min-width: 250px; /* Largeur minimale pour éviter que les champs ne deviennent trop étroits */
+}
+
+.user-form label {
+  display: block;
+  margin-bottom: 6px; /* Espace réduit entre label et input */
+  font-weight: 500; /* Police un peu plus affirmée */
+  color: var(--text-color-light, #495057);
+  font-size: 0.875em; /* Taille de police pour les labels */
+}
+
+.user-form label .required {
+  color: var(--danger-color, #dc3545);
+  margin-left: 3px;
+}
+
+.user-form input[type="text"],
+.user-form input[type="email"],
+.user-form input[type="password"],
+.user-form input[type="tel"],
+.user-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ced4da; /* Bordure standard */
+  border-radius: var(--border-radius);
+  font-size: 0.95em;
+  box-sizing: border-box; /* Important pour que padding/border n'ajoutent pas à la largeur */
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.user-form input:focus,
+.user-form select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(58, 79, 138, 0.25); /* Ombre au focus assortie */
+  outline: none;
+}
+
+.user-form .error-text {
+  color: var(--danger-color, #dc3545);
+  font-size: 0.8em;
+  margin-top: 5px;
+}
+
+.user-form .form-actions {
+  margin-top: 25px; /* Plus d'espace avant les boutons d'action */
+  display: flex;
+  justify-content: flex-end; /* Aligner les boutons à droite */
+  gap: 12px; /* Espace entre les boutons */
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color); /* Ligne de séparation */
+}
+
+/* Messages de succès/erreur globaux pour le formulaire */
+.form-success-message {
+  background-color: #d1e7dd; /* Vert plus doux */
+  color: #0f5132;
+  border: 1px solid #badbcc;
+  padding: 12px 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+.form-error-message.global-error { /* Pour l'erreur générale du formulaire */
+  background-color: #f8d7da;
+  color: #721c24; /* Rouge foncé */
+  border: 1px solid #f5c6cb;
+  padding: 12px 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 0.9em;
+}
+
+/* Responsive pour les lignes du formulaire */
+@media (max-width: 768px) {
+  .user-form .form-row {
+    flex-direction: column; /* Les champs se superposent sur mobile */
+    gap: 0; /* Pas de gap horizontal si superposé */
+  }
+  .user-form .form-group {
+    flex-basis: 100%; /* Chaque groupe prend toute la largeur */
+    margin-bottom: 18px; /* Marge entre les champs superposés */
+    min-width: unset; /* Annuler la largeur minimale */
+  }
+  .user-form {
+    padding: 20px;
+  }
+  .user-form .form-actions {
+    flex-direction: column; /* Boutons en colonne sur mobile */
+  }
+  .user-form .form-actions .btn {
+    width: 100%; /* Boutons pleine largeur sur mobile */
+  }
+  .user-form .form-actions .btn + .btn { /* Marge entre les boutons en colonne */
+      margin-top: 10px;
+      margin-left: 0;
+  }
+}

@@ -20,6 +20,7 @@ import InventairePage from '../pages/InventairePage';
 // Importez des icônes (exemple avec React Icons - voir section suivante)
 import { FaTachometerAlt, FaBoxOpen, FaTags, FaCog, FaFileAlt, FaQrcode, FaUsers, FaServicestack, FaBuilding, FaTruckMoving, FaUserCircle, FaBell } from 'react-icons/fa'; // Font Awesome
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md'; // Material Design pour les chevrons
+import UserManagementPage from '../pages/GestionUsersPage';
 
 // Vos composants de page (s'ils sont très simples, sinon gardez-les dans /pages)
 // const PlaceholderPage = ({ title }) => <div style={{ padding: '20px' }}><h1>{title}</h1><p>Contenu de la page {title}.</p></div>;
@@ -165,6 +166,7 @@ const SidebarAndContent = () => {
           <Route path="/referentiel/divisions" element={<DivisionPage />} />
           <Route path="/referentiel/categorie-fournisseur" element={<CategorieFournisseurPage />} /> 
           <Route path="/referentiel/bureaux" element={<BureauPage />} />
+          <Route path="/referentiel/utilisateur" element={<UserManagementPage />} />
           <Route path="/inventaire" element={<InventairePage />} /> 
           {/* Ajoutez les Routes pour les autres pages de référentiel et principales */}
           {/* Exemple : <Route path="/referentiel/bureau" element={<PlaceholderPage title="Bureau" />} /> */}

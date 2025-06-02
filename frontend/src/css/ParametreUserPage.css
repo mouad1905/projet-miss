@@ -1,0 +1,107 @@
+/* frontend/src/components/AccountSettings.css */
+.account-settings-container {
+  max-width: 700px; /* Limite la largeur pour une meilleure lisibilité */
+  margin: 0 auto; /* Centre le contenu si la page est plus large */
+}
+
+.settings-section {
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: var(--border-radius, 0.3rem);
+  box-shadow: var(--box-shadow-light, 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075));
+  margin-bottom: 30px;
+}
+
+.settings-section h3 {
+  font-size: 1.25em;
+  color: var(--text-color-dark, #343a40);
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color, #dee2e6);
+}
+
+.settings-form .form-group {
+  margin-bottom: 20px;
+}
+
+.settings-form label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+  color: var(--text-color-light, #495057);
+}
+
+.settings-form input[type="text"],
+.settings-form input[type="password"],
+.settings-form input[type="email"] { /* Si vous ajoutez l'email */
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: var(--border-radius, 0.3rem);
+  font-size: 0.95em;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.settings-form input:focus {
+  border-color: var(--primary-color, #3A4F8A);
+  box-shadow: 0 0 0 0.2rem rgba(58, 79, 138, 0.25);
+  outline: none;
+}
+
+/* Pour le champ nom d'utilisateur avec le bouton Enregistrer à côté */
+.input-with-button {
+  display: flex;
+  align-items: center;
+}
+.input-with-button .input-icon-prefix {
+    padding: 10px;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-right: none;
+    border-radius: var(--border-radius, 0.3rem) 0 0 var(--border-radius, 0.3rem);
+    color: var(--text-color-muted, #6c757d);
+}
+.input-with-button input {
+  flex-grow: 1;
+  border-radius: 0; /* Enlève le radius de gauche si préfixe */
+}
+.input-with-button input:focus {
+    position: relative; /* Pour que le box-shadow soit au-dessus */
+    z-index: 2;
+}
+.input-with-button .btn-inline {
+  margin-left: -1px; /* Pour que la bordure chevauche */
+  border-radius: 0 var(--border-radius, 0.3rem) var(--border-radius, 0.3rem) 0;
+  padding: 10px 15px; /* Assurer la même hauteur que l'input */
+  font-size: 0.95em; /* Assurer la même taille de police */
+  height: calc(20px + 2*10px + 2*1px); /* padding + text + border, à ajuster */
+}
+
+
+.settings-form .form-actions {
+  margin-top: 20px;
+  text-align: left; /* Ou right, selon votre préférence */
+}
+/* .settings-form .form-actions .btn {
+    /* Styles spécifiques si besoin 
+} */
+
+.message {
+  font-size: 0.85em;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 4px;
+}
+.message.success {
+  color: var(--success-color, #155724);
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+}
+.message.error {
+  color: var(--danger-color, #721c24);
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+}

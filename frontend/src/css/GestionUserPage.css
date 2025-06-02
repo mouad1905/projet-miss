@@ -1,0 +1,36 @@
+/* frontend/src/pages/UserManagement.css */
+.user-management-page .content-header h1 {
+  /* Styles spécifiques si besoin ou hérite de SharedTableView.css */
+}
+
+.user-management-tabs {
+  display: flex;
+  margin-bottom: 25px;
+  border-bottom: 1px solid var(--border-color, #dee2e6);
+}
+
+.user-management-tabs .tab-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 1em;
+  color: var(--text-color-muted, #6c757d);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px; /* Pour que la bordure active chevauche celle du conteneur */
+  transition: color 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+.user-management-tabs .tab-button:hover {
+  color: var(--primary-color, #3A4F8A);
+}
+
+.user-management-tabs .tab-button.active {
+  color: var(--primary-color, #3A4F8A);
+  border-bottom-color: var(--primary-color, #3A4F8A);
+  font-weight: 500;
+}
+
+/* .user-management-content {
+  /* Styles pour le conteneur du contenu de l'onglet si nécessaire 
+} */
