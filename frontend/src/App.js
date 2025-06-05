@@ -24,11 +24,11 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    // <AuthProvider> {/* AuthProvider englobe tout */}
+    <AuthProvider> {/* AuthProvider englobe tout */}
       <BrowserRouter>
         <AppRoutes /> {/* Composant séparé pour les routes pour utiliser useAuth */}
       </BrowserRouter>
-    // </AuthProvider>
+    </AuthProvider>
   );
 }
 

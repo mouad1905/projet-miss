@@ -1,40 +1,58 @@
-// frontend/src/pages/DivisionPageComponent.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import '../css/ConsommableList.css'; // Ou le nom que vous avez choisi
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'; // Importer SweetAlert2
+import 'sweetalert2/dist/sweetalert2.min.css'; // Styles pour SweetAlert2
 
-// --- Composant AddDivisionForm ---
-// (Peut être mis dans un fichier séparé : AddDivisionForm.jsx)
-const AddDivisionForm = ({ onSave, onCancel, isLoading }) => {
+// Assurez-vous que ces chemins sont corrects
+import '../css/ConsommableList.css'; // Ou votre fichier CSS partagé comme SharedTableView.css
+
+// --- Composant DivisionForm ---
+const DivisionForm = ({ onSave, onCancel, isLoading, initialData = null }) => {
   const [libelle, setLibelle] = useState('');
+  const isEditMode = !!initialData;
+
+  useEffect(() => {
+    if (isEditMode && initialData && initialData.libelle) {
+      setLibelle(initialData.libelle);
+    } else {
+      setLibelle('');
+    }
+  }, [initialData, isEditMode]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!libelle.trim()) {
-      alert("Le libellé ne peut pas être vide.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Le libellé ne peut pas être vide!',
+      });
       return;
     }
-    onSave({ libelle });
+    onSave({ libelle }, initialData ? initialData.id : null);
   };
 
   return (
     <div className="add-form-container" style={formContainerStyle}>
-      <form onSubmit={handleSubmit} style={formStyle} method='post' action="http://127.0.0.1:8000/api/divisions">
-        <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>Ajouter une nouvelle division</h3>
+      <form onSubmit={handleSubmit} style={formStyle}>
+        <h3 style={{ textAlign: 'center', marginBottom: '20px' }}>
+          {isEditMode ? 'Modifier la division' : 'Ajouter une nouvelle division'}
+        </h3>
         <div style={formGroupStyle}>
-          <label htmlFor="libelle" style={labelStyle}>Libellé :</label>
+          <label htmlFor="libelle-form" style={labelStyle}>Libellé :</label>
           <input
             type="text"
-            id="libelle"
+            id="libelle-form"
             value={libelle}
             onChange={(e) => setLibelle(e.target.value)}
             style={inputStyle}
-            disabled={isLoading} // Désactive pendant le chargement
+            disabled={isLoading}
             required
           />
         </div>
         <div style={formActionsStyle}>
           <button type="submit" className="btn btn-primary btn-sm" disabled={isLoading}>
-            {isLoading ? 'Enregistrement...' : 'Enregistrer'}
+            {isLoading ? (isEditMode ? 'Modification...' : 'Enregistrement...') : (isEditMode ? 'Modifier' : 'Enregistrer')}
           </button>
           <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel} disabled={isLoading} style={{ marginLeft: '10px' }}>
             Annuler
@@ -45,101 +63,163 @@ const AddDivisionForm = ({ onSave, onCancel, isLoading }) => {
   );
 };
 
-// Styles basiques pour le formulaire (à externaliser dans un CSS si vous le souhaitez)
-const formContainerStyle = { /* ... (styles de la réponse précédente) ... */ };
-const formStyle = { /* ... */ };
-const formGroupStyle = { /* ... */ };
-const labelStyle = { /* ... */ };
-const inputStyle = { /* ... */ };
-const formActionsStyle = { /* ... */ };
-// --- Fin Composant AddDivisionForm ---
+// Styles pour le formulaire (À METTRE DANS VOTRE FICHIER CSS PARTAGÉ)
+const formContainerStyle = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 };
+const formStyle = { background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 5px 15px rgba(0,0,0,0.3)', width: '400px', maxWidth: '90%' };
+const formGroupStyle = { marginBottom: '15px' };
+const labelStyle = { display: 'block', marginBottom: '5px', fontWeight: 'bold' };
+const inputStyle = { width: '100%', padding: '10px', border: '1px solid #ccc', borderRadius: '4px', boxSizing: 'border-box' };
+const formActionsStyle = { marginTop: '20px', textAlign: 'right' };
+// --- Fin Composant DivisionForm ---
 
 
 const DivisionPageComponent = () => {
-  const [data, setData] = useState([]); // Initialisé à vide, sera chargé depuis l'API
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Pour l'état de chargement général de la page
-  const [isSubmitting, setIsSubmitting] = useState(false); // Pour l'état de soumission du formulaire
+  const [data, setData] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingDivision, setEditingDivision] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Plus besoin d'un état `error` global si on utilise Swal pour les erreurs ponctuelles
+  // const [error, setError] = useState(null); 
 
-  // États pour la pagination, la recherche (comme avant)
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Fonction pour charger les divisions depuis l'API
+  const API_BASE_URL = 'http://127.0.0.1:8000/api';
+  // const navigate = useNavigate(); // Si besoin
+
+  const getToken = () => localStorage.getItem('authToken');
+
   const fetchDivisions = useCallback(async () => {
     setIsLoading(true);
+    // setError(null); // Plus besoin si Swal gère les erreurs
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/divisions'); // Adaptez l'URL de votre API Laravel
+      const response = await fetch(`${API_BASE_URL}/divisions`, {
+        headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${getToken()}` }
+      });
       if (!response.ok) {
-      let errorMessage = `Erreur HTTP ${response.status} (${response.statusText}).`;
-      try {
-        // Essayer de voir si le corps de la réponse contient plus d'infos (peut-être du JSON d'erreur)
-        const errorBody = await response.json(); // Ou response.text() si ce n'est pas du JSON
-        errorMessage += ` Détails: ${JSON.stringify(errorBody)}`;
-      } catch (e) {
-        // Le corps n'était pas du JSON ou il y a eu une autre erreur en essayant de le lire
-        const errorText = await response.text().catch(() => "Impossible de lire le corps de la réponse.");
-        console.error("Corps de la réponse d'erreur (non-JSON) :", errorText); // Affiche le HTML dans la console
-        errorMessage += " La réponse du serveur n'était pas au format JSON attendu.";
+        const errorData = await response.json().catch(() => ({ message: `Erreur HTTP ${response.status}` }));
+        throw new Error(errorData.message || `Erreur HTTP ${response.status}`);
       }
-      throw new Error(errorMessage);
-    }
       const divisionsFromApi = await response.json();
       setData(divisionsFromApi);
-    } catch (error) {
-      console.error("Erreur lors de la récupération des divisions:", error);
-      alert(`Erreur lors de la récupération des divisions: ${error.message}`);
-      setData([]); // Optionnel: vider les données en cas d'erreur
+    } catch (err) {
+      console.error("Erreur lors de la récupération des divisions:", err);
+      Swal.fire('Erreur!', `Erreur lors de la récupération des divisions: ${err.message}`, 'error');
+      setData([]);
     } finally {
       setIsLoading(false);
     }
-  }, []); // useCallback pour éviter des recréations inutiles si passée en dépendance
+  }, []);
 
-  // Charger les données initiales au montage du composant
   useEffect(() => {
     fetchDivisions();
-  }, [fetchDivisions]); // fetchDivisions est maintenant stable grâce à useCallback
+  }, [fetchDivisions]);
 
-  const handleAddDivision = async (newDivisionData) => {
+  const handleOpenAddForm = () => {
+    setEditingDivision(null);
+    setShowForm(true);
+  };
+
+  const handleOpenEditForm = (division) => {
+    setEditingDivision(division); // Stocke la division entière pour l'édition
+    setShowForm(true);
+  };
+
+  const handleFormSave = async (formData, divisionId) => {
     setIsSubmitting(true);
+    // setError(null); // Plus besoin
+    const isEditMode = !!divisionId;
+    const url = isEditMode ? `${API_BASE_URL}/divisions/${divisionId}` : `${API_BASE_URL}/divisions`;
+    const method = isEditMode ? 'PUT' : 'POST';
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/divisions', { // Adaptez l'URL de votre API Laravel
-        method: 'POST',
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          // Ajoutez ici d'autres headers si nécessaire (ex: token CSRF pour Laravel, token d'authentification)
-          // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Si vous utilisez Laravel Blade avec un meta tag CSRF
+          'Authorization': `Bearer ${getToken()}`
         },
-        body: JSON.stringify(newDivisionData),
+        body: JSON.stringify(formData), // formData contient { libelle: 'nouveau libelle' }
       });
 
+      const responseData = await response.json(); // Toujours essayer de parser
+
       if (!response.ok) {
-        // Essayer de lire le message d'erreur du backend s'il y en a un
-        const errorData = await response.json().catch(() => ({ message: 'Une erreur est survenue lors de l\'ajout.' }));
-        throw new Error(errorData.message || `Erreur HTTP ${response.status}`);
+        // Les erreurs de validation de Laravel (422) devraient être dans responseData.errors
+        // Les autres erreurs (500, 403 etc.) dans responseData.message
+        const errorMessage = responseData.message || 
+                             (responseData.errors ? Object.values(responseData.errors).flat().join(' ') : `Erreur HTTP ${response.status}`);
+        throw new Error(errorMessage);
       }
-
-      const createdDivision = await response.json(); // La nouvelle division avec son ID
       
-      // Option 1: Ajouter directement à l'état local (plus rapide pour l'UX)
-      setData(prevData => [...prevData, createdDivision]);
-      
-      // Option 2: Recharger toutes les données pour garantir la cohérence (plus sûr)
-      // await fetchDivisions(); // Décommentez si vous préférez cette approche
+      // La réponse du backend pour PUT devrait être la division mise à jour
+      const savedDivision = responseData; 
 
-      setShowAddForm(false);
-      alert(`Division "${createdDivision.libelle}" ajoutée avec succès !`);
-    } catch (error) {
-      console.error("Erreur lors de l'ajout de la division:", error);
-      alert(`Erreur lors de l'ajout : ${error.message}`);
+      if (isEditMode) {
+        setData(prevData => prevData.map(item => item.id === divisionId ? savedDivision : item));
+        Swal.fire('Modifié!', `Division "${savedDivision.libelle}" modifiée avec succès.`, 'success');
+      } else {
+        setData(prevData => [...prevData, savedDivision]);
+        Swal.fire('Ajouté!', `Division "${savedDivision.libelle}" ajoutée avec succès.`, 'success');
+      }
+      setShowForm(false);
+      setEditingDivision(null);
+    } catch (err) {
+      console.error(`Erreur lors de ${isEditMode ? 'la modification' : 'l\'ajout'} de la division:`, err);
+      Swal.fire('Erreur!', err.message || `Une erreur est survenue lors de ${isEditMode ? 'la modification' : 'l\'ajout'}.`, 'error');
+      // Ne pas fermer le formulaire en cas d'erreur pour permettre la correction
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Logique de filtrage et de pagination (inchangée)
+  const handleDeleteDivision = (divisionId, divisionLibelle) => {
+    Swal.fire({
+      title: 'Êtes-vous sûr?',
+      text: `Vous êtes sur le point de supprimer la division "${divisionLibelle}". Cette action est irréversible!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Oui, supprimer!',
+      cancelButtonText: 'Annuler'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setIsSubmitting(true); // Utiliser isSubmitting ou un état dédié comme isDeleting
+        // setError(null); // Plus besoin
+        try {
+          const response = await fetch(`${API_BASE_URL}/divisions/${divisionId}`, {
+            method: 'DELETE',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${getToken()}`
+            },
+          });
+
+          if (!response.ok) {
+            // Tenter de lire un message d'erreur JSON du backend
+            const errorData = await response.json().catch(() => null);
+            const errorMessage = errorData?.message || `Erreur HTTP ${response.status} lors de la suppression.`;
+            throw new Error(errorMessage);
+          }
+          
+          // Si la suppression réussit (souvent statut 204 No Content)
+          setData(prevData => prevData.filter(item => item.id !== divisionId));
+          Swal.fire('Supprimé!', `La division "${divisionLibelle}" a été supprimée.`, 'success');
+
+        } catch (err) {
+          console.error("Erreur lors de la suppression de la division:", err);
+          Swal.fire('Erreur!', err.message || 'Une erreur est survenue lors de la suppression.', 'error');
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+    });
+  };
+
   const filteredData = data.filter(item =>
     item.libelle.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -148,30 +228,36 @@ const DivisionPageComponent = () => {
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-  if (isLoading && data.length === 0) { // Afficher un message de chargement si les données initiales ne sont pas encore là
+  if (isLoading && data.length === 0) {
     return <div className="data-table-view" style={{textAlign: 'center', padding: '50px'}}>Chargement des divisions...</div>;
   }
+  // Plus besoin d'afficher error ici si Swal le fait
+  // if (error && data.length === 0) { 
+  //   return <div className="data-table-view" style={{textAlign: 'center', padding: '50px', color: 'red'}}>Erreur: {error}</div>;
+  // }
 
   return (
     <div className="data-table-view">
-      {showAddForm && (
-        <AddDivisionForm
-          onSave={handleAddDivision}
-          onCancel={() => setShowAddForm(false)}
-          isLoading={isSubmitting} // Passe l'état de soumission au formulaire
+      {showForm && (
+        <DivisionForm
+          onSave={handleFormSave}
+          onCancel={() => { setShowForm(false); setEditingDivision(null); /* setError(null); */ }}
+          isLoading={isSubmitting}
+          initialData={editingDivision}
         />
       )}
 
       <header className="content-header">
         <h1>Liste des divisions</h1>
-        <button className="btn btn-primary btn-add" onClick={() => setShowAddForm(true)}>
+        <button className="btn btn-primary btn-add" onClick={handleOpenAddForm}>
           + Ajouter une division
         </button>
       </header>
+      
+      {/* Plus besoin d'afficher error ici si Swal le fait */}
+      {/* {error && !showForm && <div style={{color: 'red', marginBottom: '15px', textAlign: 'center'}}>{error}</div>} */}
 
-      <div className="controls-bar">
-        {/* ... select et input de recherche ... */}
-      </div>
+      <div className="controls-bar"> {/* ... select et input de recherche ... */} </div>
 
       <div className="table-container">
         <table>
@@ -183,81 +269,44 @@ const DivisionPageComponent = () => {
             </tr>
           </thead>
           <tbody>
-            {isLoading && data.length > 0 && ( /* Indicateur de chargement discret si des données sont déjà affichées */
-                <tr><td colSpan="3" style={{ textAlign: 'center', fontStyle: 'italic' }}>Mise à jour...</td></tr>
-            )}
-            {!isLoading && currentItems.length > 0 ? (
+            {isSubmitting && !showForm && <tr><td colSpan="3" style={{ textAlign: 'center', fontStyle: 'italic' }}>Opération en cours...</td></tr>}
+            {!isSubmitting && currentItems.length > 0 ? (
               currentItems.map((item) => (
                 <tr key={item.id}>
                   <td>{item.libelle}</td>
-                  <td><button className="btn btn-success btn-sm">Modifier</button></td>
-                  <td><button className="btn btn-danger btn-sm">Effacer</button></td>
+                  <td>
+                    <button 
+                      className="btn btn-success btn-sm" 
+                      onClick={() => handleOpenEditForm(item)}
+                      disabled={isSubmitting}
+                    >
+                      Modifier
+                    </button>
+                  </td>
+                  <td>
+                    <button 
+                      className="btn btn-danger btn-sm" 
+                      onClick={() => handleDeleteDivision(item.id, item.libelle)}
+                      disabled={isSubmitting}
+                    >
+                      Effacer
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
-              !isLoading && <tr><td colSpan="3" style={{ textAlign: 'center' }}>Aucune division à afficher.</td></tr>
+              !isSubmitting && !isLoading && <tr><td colSpan="3" style={{ textAlign: 'center' }}>Aucune division à afficher.</td></tr>
+            )}
+            {/* Affichage du chargement initial si des données sont déjà là mais qu'on rafraîchit */}
+            {isLoading && data.length > 0 && (
+                 <tr><td colSpan="3" style={{ textAlign: 'center', fontStyle: 'italic' }}>Chargement...</td></tr>
             )}
           </tbody>
         </table>
       </div>
-      <footer className="content-footer-bar">
-        {/* ... pagination et boutons d'export ... */}
-      </footer>
+      <footer className="content-footer-bar"> {/* ... pagination et boutons d'export ... */} </footer>
     </div>
   );
 };
 
 export default DivisionPageComponent;
-
-// RAPPEL: Les styles pour le formulaire (formContainerStyle, etc.) sont ceux de la réponse précédente.
-// Il est fortement recommandé de les déplacer dans votre fichier CSS partagé.
-// Par exemple, dans SharedTableView.css :
-/*
-.add-form-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-.add-form-container form {
-  background: white;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  width: 400px;
-  max-width: 90%;
-}
-
-.add-form-container .form-group {
-  margin-bottom: 15px;
-}
-
-.add-form-container label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.add-form-container input[type="text"] {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.add-form-container .form-actions {
-  margin-top: 20px;
-  text-align: right;
-}
-.add-form-container .form-actions .btn + .btn {
-    margin-left: 10px;
-}
-*/
