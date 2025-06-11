@@ -75,11 +75,9 @@ const SidebarAndContent = () => {
       subItems: [
         { label: "Article", href: "/referentiel/articles", icon: <FaFileAlt /> },
         { label: "Bureau", href: "/referentiel/bureaux", icon: <FaBuilding /> },
-        { label: "Catégorie de fournisseur", href: "/referentiel/categorie-fournisseur", icon: <FaTags /> },
         { label: "Division", href: "/referentiel/divisions", icon: <FaUsers /> }, // Exemple
         { label: "Fournisseur", href: "/referentiel/fournisseurs", icon: <FaTruckMoving /> },
-        { label: "Catégorie d'article", href: "/referentiel/categorie-article", icon: <FaBoxOpen /> },
-        { label: "Catégorie de consommable", href: "/referentiel/categorie-consommable", icon: <FaTags /> }, // Répété, ajustez
+        { label: "Catégorie d'article", href: "/referentiel/categorie-article", icon: <FaBoxOpen /> }, // Répété, ajustez
         { label: "Catégorie d'employer", href: "/referentiel/type-employeur", icon: <FaUsers /> },
         { label: "Service", href: "referentiel/services", icon: <FaServicestack /> },
         { label: "Utilisateur", href: "/referentiel/utilisateur", icon: <FaUserCircle /> },
@@ -159,14 +157,12 @@ const SidebarAndContent = () => {
       >
         <Routes>
           <Route path="/tableau-de-bord" element={<TableauDeBordPage />} />
-          <Route path="/referentiel/categorie-consommable" element={<CategorieConsommablePage />} />
           <Route path="/referentiel/articles" element={<ArticleListPage />} />
           <Route path="/referentiel/categorie-employer" element={<TypeEmployeurPage />} />
           <Route path="/referentiel/services" element={<ServicePageComponent />} />
           <Route path="/referentiel/categorie-article" element={<CategorieArticlePage />} />
           <Route path="/referentiel/fournisseurs" element={<FournisseurPage />} />
-          <Route path="/referentiel/divisions" element={<DivisionPage />} />
-          <Route path="/referentiel/categorie-fournisseur" element={<CategorieFournisseurPage />} /> 
+          <Route path="/referentiel/divisions" element={<DivisionPage />} /> 
           <Route path="/referentiel/bureaux" element={<BureauPage />} />
           <Route path="/referentiel/utilisateur" element={<UserManagementPage />} />
           <Route path="/inventaire" element={<InventairePage />} /> 
