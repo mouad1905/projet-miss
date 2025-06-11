@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext'; // Pour récupérer l'utilisateur actuel et son token
 import '../css/ParametreUserPage.css'; // Styles spécifiques pour ce composant
+import Loader from '../component/Loader';
 // import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Pour afficher/cacher le mot de passe
 
 const AccountSettingsComponent = () => {
@@ -93,7 +94,7 @@ const AccountSettingsComponent = () => {
   };
 
   if (!user) {
-    return <p>Chargement des informations du compte...</p>;
+    return <p><Loader/></p>;
   }
 
   return (

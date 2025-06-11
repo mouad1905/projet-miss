@@ -1,93 +1,269 @@
-// frontend/src/pages/BureauPageComponent.jsx
-import React, { useState } from 'react';
-// Assurez-vous que le chemin vers votre CSS partagé est correct
-import '../css/ConsommableList.css'; // Ou le nom que vous avez choisi
+import React, { useState, useEffect, useCallback } from 'react';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
-// Optionnel: Icône pour le bouton "Ajouter"
-// import { FaPlus } from 'react-icons/fa';
-// Vous pourriez aussi vouloir une icône spécifique pour les bureaux
-import { FaBuilding } from 'react-icons/fa'; // Exemple
+// Importations des utilitaires et styles
+import { showSuccessToast, showErrorAlert, showConfirmDialog } from '../utils/SwalAlerts'; // Assurez-vous que le chemin est correct
+import Loader from '../component/Loader'; // Assurez-vous que le chemin est correct
+import '../css/ConsommableList.css'; // Votre CSS partagé
+
+// --- Composant BureauForm ---
+const BureauForm = ({ onSave, onCancel, isLoading, initialData = null, divisionsList = [], servicesList = [] }) => {
+  const [libelle, setLibelle] = useState('');
+  const [abreviation, setAbreviation] = useState('');
+  const [divisionId, setDivisionId] = useState('');
+  const [serviceId, setServiceId] = useState('');
+  
+  const isEditMode = !!initialData;
+
+  // Filtrer les services basés sur la division sélectionnée
+  const filteredServices = divisionId ? servicesList.filter(s => s.division_id == divisionId) : [];
+
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      setLibelle(initialData.libelle || '');
+      setAbreviation(initialData.abreviation || '');
+      // Pré-remplir la division et le service
+      const initialService = initialData.service;
+      if (initialService) {
+        setDivisionId(initialService.division_id || '');
+        setServiceId(initialService.id || '');
+      } else {
+         setDivisionId('');
+         setServiceId('');
+      }
+    } else {
+      // Réinitialiser pour le mode ajout
+      setLibelle('');
+      setAbreviation('');
+      setDivisionId('');
+      setServiceId('');
+    }
+  }, [initialData, isEditMode]);
+
+  const handleDivisionChange = (e) => {
+    setDivisionId(e.target.value);
+    setServiceId(''); // Réinitialiser le service quand la division change
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!libelle.trim() || !abreviation.trim() || !serviceId) {
+      showErrorAlert('Veuillez remplir tous les champs obligatoires.');
+      return;
+    }
+    onSave({ libelle, abreviation, service_id: serviceId }, initialData ? initialData.id : null);
+  };
+
+  return (
+    <div className="add-form-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+      <form onSubmit={handleSubmit} style={{ background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 5px 15px rgba(0,0,0,0.3)', width: '500px', maxWidth: '90%' }}>
+        <h3 style={{ textAlign: "center", marginBottom: "25px" }}>
+          {isEditMode ? "Modifier le bureau" : "Ajouter un nouveau bureau"}
+        </h3>
+        <div style={{ marginBottom: '15px' }}>
+          <label htmlFor="libelle-bureau-form" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Libellé :</label>
+          <input type="text" id="libelle-bureau-form" value={libelle} onChange={(e) => setLibelle(e.target.value)} style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} disabled={isLoading} required />
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label htmlFor="abreviation-bureau-form" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Abréviation :</label>
+          <input type="text" id="abreviation-bureau-form" value={abreviation} onChange={(e) => setAbreviation(e.target.value)} style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} disabled={isLoading} required />
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label htmlFor="division-bureau-form" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Division :</label>
+          <select id="division-bureau-form" value={divisionId} onChange={handleDivisionChange} style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} disabled={isLoading} required>
+            <option value="">Choisissez la division</option>
+            {divisionsList.map(d => <option key={d.id} value={d.id}>{d.libelle}</option>)}
+          </select>
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label htmlFor="service-bureau-form" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Service :</label>
+          <select id="service-bureau-form" value={serviceId} onChange={(e) => setServiceId(e.target.value)} style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} disabled={!divisionId || isLoading} required>
+            <option value="">Choisissez le service</option>
+            {filteredServices.map(s => <option key={s.id} value={s.id}>{s.libelle}</option>)}
+          </select>
+        </div>
+        <div style={{ marginTop: "25px", textAlign: "right", display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel} disabled={isLoading}>Annuler</button>
+          <button type="submit" className="btn btn-primary btn-sm" disabled={isLoading}>{isLoading ? "Sauvegarde..." : "Sauvegarder"}</button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 
 const BureauPageComponent = () => {
-  // Données d'exemple pour les bureaux (issues de votre capture d'écran)
-  const [data, setData] = useState([
-    { id: 1, libelle: 'Bureau de maintenance et de gestion du matériel et des équipement', abreviation: 'BMGME', service: 'Service des études, du suivi des travaux et de la logistique' },
-    { id: 2, libelle: 'Bureau de gestion des affaires du personnel', abreviation: 'BGAP', service: 'Service de gestion des ressources humaines et de renforcement des capacités' },
-    { id: 3, libelle: 'Bureau de certification des signatures et de la conformité des copies aux originaux et ses annexes', abreviation: 'BCSGCODAAA', service: "Service d'accès aux services" },
-    { id: 4, libelle: "Bureau d'accueil, d'orientation et suivi des usagers", abreviation: 'BAOSU', service: "Service de la communication et de l'administration ouverte" },
-    { id: 5, libelle: 'bureau de gestion déléguée et de suivi des sociétés de développement et des services publiques locaux', abreviation: 'BGSSDSPL', service: 'Service de la planification et de la gestion urbanisme et des propriétés' },
-    { id: 6, libelle: 'Bureau des paiements', abreviation: 'BP', service: "Service d'accès aux services" },
-    { id: 7, libelle: "Bureau d'urbanisme, de construction et d'aménagement du territoire", abreviation: 'BUCAT', service: 'Service de la planification et de la gestion urbanisme et des propriétés' },
-    { id: 8, libelle: "Bureau des espaces verts et de l'éclairage public", abreviation: 'BEVEP', service: 'Service des études, du suivi des travaux et de la logistique' },
-    { id: 9, libelle: "Bureau des systèmes d'information géographique et de gestion intégrée", abreviation: 'BSISGGI', service: "Service de l'accompagnement de la transformation numérique et de la gestion des archives" },
-    { id: 10, libelle: 'bureau de la planification, de la préparation des partenariats et du suivi des programme de développement', abreviation: 'BPPPSD', service: 'Service de la planification et de la gestion urbanisme et des propriétés' },
-    // La capture montre 24 éléments au total, ajoutez les autres si besoin pour un test complet
-  ]);
+  const [data, setData] = useState([]); // Liste des bureaux
+  const [divisionsList, setDivisionsList] = useState([]);
+  const [servicesList, setServicesList] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingBureau, setEditingBureau] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingDependencies, setIsLoadingDependencies] = useState(false);
 
-  // États pour la pagination, la recherche, etc.
+  // Pagination et recherche
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Logique de filtrage et de pagination (recherche sur libelle, abreviation, service)
+  const API_BASE_URL = 'http://127.0.0.1:8000/api';
+  const getToken = () => localStorage.getItem('authToken');
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setIsLoadingDependencies(true);
+    try {
+      const token = getToken();
+      const headers = { 'Accept': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) };
+      
+      // Récupérer bureaux, divisions, et services en parallèle
+      const [bureauxRes, divisionsRes, servicesRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/bureaux`, { headers }),
+        fetch(`${API_BASE_URL}/divisions`, { headers }),
+        fetch(`${API_BASE_URL}/services`, { headers }),
+      ]);
+
+      if (!bureauxRes.ok) throw new Error('Erreur chargement bureaux');
+      if (!divisionsRes.ok) throw new Error('Erreur chargement divisions');
+      if (!servicesRes.ok) throw new Error('Erreur chargement services');
+
+      setData(await bureauxRes.json());
+      setDivisionsList(await divisionsRes.json());
+      setServicesList(await servicesRes.json());
+
+    } catch (err) {
+      console.error("Erreur lors de la récupération des données:", err);
+      showErrorAlert(err.message || 'Une erreur est survenue lors du chargement des données.');
+    } finally {
+      setIsLoading(false);
+      setIsLoadingDependencies(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleOpenAddForm = () => {
+    if (isLoadingDependencies) {
+      Swal.fire('Veuillez patienter', 'Chargement des données nécessaires...', 'info');
+      return;
+    }
+    setEditingBureau(null);
+    setShowForm(true);
+  };
+
+  const handleOpenEditForm = (bureau) => {
+    setEditingBureau(bureau);
+    setShowForm(true);
+  };
+
+  const handleFormSave = async (formData, bureauId) => {
+    setIsSubmitting(true);
+    const isEditMode = !!bureauId;
+    const url = isEditMode ? `${API_BASE_URL}/bureaux/${bureauId}` : `${API_BASE_URL}/bureaux`;
+    const method = isEditMode ? 'PUT' : 'POST';
+    const token = getToken();
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        const responseData = await response.json();
+        const errorMessage = responseData.message || (responseData.errors ? Object.values(responseData.errors).flat().join(' ') : `Erreur HTTP ${response.status}`);
+        throw new Error(errorMessage);
+      }
+      
+      fetchData(); // Recharger toutes les données pour la cohérence
+      showSuccessToast(`Bureau ${isEditMode ? 'modifié' : 'ajouté'} avec succès`);
+      setShowForm(false);
+    } catch (err) {
+      showErrorAlert(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteBureau = (bureauId, bureauLibelle) => {
+    showConfirmDialog({
+      text: `Supprimer le bureau "${bureauLibelle}" ?`,
+      confirmButtonText: 'Oui, supprimer!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setIsSubmitting(true);
+        const token = getToken();
+        try {
+          const response = await fetch(`${API_BASE_URL}/bureaux/${bureauId}`, {
+            method: 'DELETE',
+            headers: { 'Accept': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) },
+          });
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Erreur HTTP ${response.status}`);
+          }
+          setData(prevData => prevData.filter(item => item.id !== bureauId));
+          showSuccessToast('Bureau supprimé avec succès!');
+        } catch (err) {
+          showErrorAlert(err.message);
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+    });
+  };
+
   const filteredData = data.filter(item =>
-    item.libelle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.abreviation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.service.toLowerCase().includes(searchTerm.toLowerCase())
+    (item.libelle && item.libelle.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (item.abreviation && item.abreviation.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (item.service && item.service.libelle && item.service.libelle.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
-  // La capture montre 24 éléments au total, pour la pagination correcte,
-  // utilisez filteredData.length qui correspondra au nombre total d'éléments après filtrage.
-  // Si vous voulez simuler les 24 éléments sans les ajouter tous à `data` :
-  // const totalItemsFromDB = 24; // Simule le total
-  // const totalPages = Math.ceil(totalItemsFromDB / itemsPerPage);
-
+  const currentItems = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
+  if (isLoading) {
+    return <div className="data-table-view"><Loader /></div>;
+  }
 
   return (
-    <div className="data-table-view"> {/* Utilisation de la classe principale du CSS partagé */}
+    <div className="data-table-view">
+      {showForm && (
+        <BureauForm
+          onSave={handleFormSave}
+          onCancel={() => setShowForm(false)}
+          isLoading={isSubmitting}
+          initialData={editingBureau}
+          divisionsList={divisionsList}
+          servicesList={servicesList}
+        />
+      )}
       <header className="content-header">
         <h1>Liste des bureaux</h1>
-        <button className="btn btn-primary btn-add">
-          {/* <FaPlus style={{ marginRight: '8px' }} /> Optionnel: Icône */}
-          + Ajouter un bureau
+        <button className="btn btn-primary btn-add" onClick={handleOpenAddForm} disabled={isLoadingDependencies}>
+          {isLoadingDependencies ? 'Chargement...' : '+ Ajouter un bureau'}
         </button>
       </header>
-
       <div className="controls-bar">
         <div className="entries-selector">
-          Afficher{' '}
-          <select value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}>
-            <option value="10">10</option>
-            <option value="25">25</option> {/* Adaptez si vous avez moins de 25 éléments */}
-            <option value="50">50</option>
-          </select>{' '}
-          éléments
+            Afficher <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}><option value="10">10</option><option value="25">25</option><option value="50">50</option></select> éléments
         </div>
         <div className="search-bar">
-          Rechercher: <input
-            type="text"
-            placeholder="Rechercher..."
-            value={searchTerm}
-            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-          />
+            Rechercher: <input type="text" placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
       </div>
-
       <div className="table-container">
         <table>
           <thead>
             <tr>
-              <th>Libellé <span className="sort-arrow">↕</span></th>
-              <th>Abréviation <span className="sort-arrow">↕</span></th>
-              <th>Service <span className="sort-arrow">↕</span></th>
-              <th>Modifier <span className="sort-arrow">↕</span></th>
-              <th>Effacer <span className="sort-arrow">↕</span></th>
+              <th>Libellé</th>
+              <th>Abréviation</th>
+              <th>Service</th>
+              <th>Modifier</th>
+              <th>Effacer</th>
             </tr>
           </thead>
           <tbody>
@@ -96,57 +272,18 @@ const BureauPageComponent = () => {
                 <tr key={item.id}>
                   <td>{item.libelle}</td>
                   <td>{item.abreviation}</td>
-                  <td>{item.service}</td>
-                  <td><button className="btn btn-success btn-sm">Modifier</button></td>
-                  <td><button className="btn btn-danger btn-sm">Effacer</button></td>
+                  <td>{item.service?.libelle || 'N/A'}</td>
+                  <td><button className="btn btn-success btn-sm" onClick={() => handleOpenEditForm(item)}>Modifier</button></td>
+                  <td><button className="btn btn-danger btn-sm" onClick={() => handleDeleteBureau(item.id, item.libelle)}>Effacer</button></td>
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="5" style={{ textAlign: 'center' }}>Aucun bureau à afficher.</td> {/* colSpan est 5 ici */}
-              </tr>
+              <tr><td colSpan="5" style={{ textAlign: "center" }}>Aucun bureau à afficher.</td></tr>
             )}
           </tbody>
         </table>
       </div>
-
-      <footer className="content-footer-bar">
-        <div className="pagination-info">
-          {/* La capture montre "Affichage de l'élément 1 à 10 sur 24 éléments" */}
-          Affichage de l'élément {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} à {Math.min(indexOfLastItem, filteredData.length)} sur {filteredData.length} éléments
-        </div>
-        <div className="pagination-controls">
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Précédent
-          </button>
-          {/* Génération dynamique des numéros de page */}
-          {/* La capture montre les pages 1, 2, 3. Adaptez la logique si nécessaire pour un grand nombre de pages. */}
-          {[...Array(totalPages).keys()].map(number => (
-             <button
-                key={number + 1}
-                className={`btn btn-page btn-sm ${currentPage === number + 1 ? 'active' : ''}`}
-                onClick={() => setCurrentPage(number + 1)}
-             >
-                {number + 1}
-             </button>
-          ))}
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages || totalPages === 0}
-          >
-            Suivant
-          </button>
-        </div>
-        <div className="export-buttons">
-          <button className="btn btn-secondary btn-sm">Export PDF</button>
-          <button className="btn btn-secondary btn-sm">Export Excel</button>
-        </div>
-      </footer>
+      <footer className="content-footer-bar">{/* ... Pagination et Exports ... */}</footer>
     </div>
   );
 };

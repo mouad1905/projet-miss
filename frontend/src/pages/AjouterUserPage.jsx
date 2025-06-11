@@ -133,7 +133,7 @@ const AddUserPageComponent = () => {
     // La classe "add-user-form-page" peut être utilisée pour des styles plus spécifiques si besoin
     <div className="data-table-view add-user-form-page">
       <header className="content-header">
-        <h1>Ajouter un nouvel utilisateur</h1>
+        <h1>Ajouter un nouveau utilisateur</h1>
       </header>
 
       {successMessage && <div className="form-success-message">{successMessage}</div>}

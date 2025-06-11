@@ -21,6 +21,8 @@ import InventairePage from '../pages/InventairePage';
 import { FaTachometerAlt, FaBoxOpen, FaTags, FaCog, FaFileAlt, FaQrcode, FaUsers, FaServicestack, FaBuilding, FaTruckMoving, FaUserCircle, FaBell } from 'react-icons/fa'; // Font Awesome
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md'; // Material Design pour les chevrons
 import UserManagementPage from '../pages/GestionUsersPage';
+import BureauPageComponent from '../pages/BureauPage';
+import TypeEmployeurPageComponent from '../pages/TypeEmployeurPage';
 
 // Vos composants de page (s'ils sont très simples, sinon gardez-les dans /pages)
 // const PlaceholderPage = ({ title }) => <div style={{ padding: '20px' }}><h1>{title}</h1><p>Contenu de la page {title}.</p></div>;
@@ -78,7 +80,7 @@ const SidebarAndContent = () => {
         { label: "Fournisseur", href: "/referentiel/fournisseurs", icon: <FaTruckMoving /> },
         { label: "Catégorie d'article", href: "/referentiel/categorie-article", icon: <FaBoxOpen /> },
         { label: "Catégorie de consommable", href: "/referentiel/categorie-consommable", icon: <FaTags /> }, // Répété, ajustez
-        { label: "Catégorie d'employer", href: "/referentiel/categorie-employer", icon: <FaUsers /> },
+        { label: "Catégorie d'employer", href: "/referentiel/type-employeur", icon: <FaUsers /> },
         { label: "Service", href: "referentiel/services", icon: <FaServicestack /> },
         { label: "Utilisateur", href: "/referentiel/utilisateur", icon: <FaUserCircle /> },
       ],
@@ -168,6 +170,8 @@ const SidebarAndContent = () => {
           <Route path="/referentiel/bureaux" element={<BureauPage />} />
           <Route path="/referentiel/utilisateur" element={<UserManagementPage />} />
           <Route path="/inventaire" element={<InventairePage />} /> 
+          <Route path="/referentiel/bureaux" element={<BureauPageComponent />} />
+          <Route path="/referentiel/type-employeur" element={<TypeEmployeurPageComponent />} />
           {/* Ajoutez les Routes pour les autres pages de référentiel et principales */}
           {/* Exemple : <Route path="/referentiel/bureau" element={<PlaceholderPage title="Bureau" />} /> */}
           {/* Route par défaut */}

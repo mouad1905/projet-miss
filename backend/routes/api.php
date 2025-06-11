@@ -1,7 +1,9 @@
 <?php
 
  
+use App\Http\Controllers\EmployeeTypeController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BureauController;
 use App\Http\Controllers\DivisionController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\test;
@@ -42,7 +44,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/divisions/{division}', [DivisionController::class, 'show']); // {division} sera l'ID
     Route::put('/divisions/{division}', [DivisionController::class, 'update']);
     Route::delete('/divisions/{division}', [DivisionController::class, 'destroy']);
-    // Ou plus simplement avec apiResource si vous n'avez pas besoin de personnaliser les noms de méthode :
-    // Route::apiResource('divisions', DivisionController::class);
-    // Ajoutez ici d'autres routes API qui nécessitent une authentification
+    Route::apiResource('bureaux', BureauController::class);
+    Route::apiResource('employee-types', EmployeeTypeController::class);
 });
