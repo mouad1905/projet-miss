@@ -7,6 +7,8 @@ use App\Http\Controllers\EmployeeTypeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BureauController;
 use App\Http\Controllers\DivisionController;
+use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\test;
 
@@ -46,4 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('employee-types', EmployeeTypeController::class);
     Route::apiResource('article-categories', ArticleCategoryController::class);
     Route::apiResource('articles', ArticleController::class);
+    Route::apiResource('fournisseurs', FournisseurController::class);
+    Route::put('/user/profile-information', [ProfileController::class, 'updateProfile']);
+    Route::put('/user/password', [ProfileController::class, 'changePassword']);
 });
