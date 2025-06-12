@@ -1,10 +1,14 @@
 <?php
 
  
+use App\Http\Controllers\ArticleCategoryController;
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\EmployeeTypeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BureauController;
 use App\Http\Controllers\DivisionController;
+use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\test;
 
@@ -25,15 +29,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::get('/divisions', [DivisionController::class, 'index']);
-Route::post('/divisions', [DivisionController::class, 'store']);
-Route::delete('/divisions/{division}', [DivisionController::class, 'destroy']);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Assurez-vous aussi que GET /api/divisions est accessible pour peupler le dropdown
-Route::get('/divisions', [DivisionController::class, 'index']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('services', ServiceController::class);
@@ -46,4 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/divisions/{division}', [DivisionController::class, 'destroy']);
     Route::apiResource('bureaux', BureauController::class);
     Route::apiResource('employee-types', EmployeeTypeController::class);
+    Route::apiResource('article-categories', ArticleCategoryController::class);
+    Route::apiResource('articles', ArticleController::class);
+    Route::apiResource('fournisseurs', FournisseurController::class);
+    Route::put('/user/profile-information', [ProfileController::class, 'updateProfile']);
+    Route::put('/user/password', [ProfileController::class, 'changePassword']);
 });

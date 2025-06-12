@@ -1,0 +1,141 @@
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  padding: 25px 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  width: 100%;
+  max-width: 700px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+  border-bottom: 1px solid var(--border-color, #dee2e6);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5em;
+  color: var(--text-color-dark, #343a40);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.8em;
+  line-height: 1;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0;
+}
+.close-button:hover {
+  color: #000;
+}
+
+/* --- Grille pour le corps du formulaire --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Deux colonnes de largeur égale */
+  /* --- MODIFICATION IMPORTANTE ICI --- */
+  /* 'gap' est un raccourci pour 'row-gap' et 'column-gap' */
+  /* Augmentez la deuxième valeur pour plus d'espace horizontal */
+  gap: 20px 25px; /* 20px d'espace vertical, 25px d'espace horizontal */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1; /* Permet à un champ de prendre toute la largeur */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 0.9em;
+  color: var(--text-color-light, #495057);
+}
+
+.form-group label .required-star {
+  color: var(--danger-color, #dc3545);
+  margin-left: 3px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: var(--border-radius, 0.3rem);
+  font-size: 0.95em;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary-color, #3A4F8A);
+  box-shadow: 0 0 0 0.2rem rgba(58, 79, 138, 0.25);
+  outline: none;
+}
+
+.modal-footer {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color, #dee2e6);
+}
+
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr; /* Une seule colonne sur mobile */
+    gap: 0;
+  }
+  .form-group {
+      margin-bottom: 18px;
+  }
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 25px; /* 20px vertical, 25px horizontal */
+  padding-inline: 15px; /* Ajoute un espace à gauche et à droite */
+}
+
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-inline: 10px;
+  }
+}

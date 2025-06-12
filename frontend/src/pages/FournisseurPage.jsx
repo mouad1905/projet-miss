@@ -1,140 +1,235 @@
 // frontend/src/pages/FournisseurPageComponent.jsx
-import React, { useState } from 'react';
-// Assurez-vous que le chemin vers votre CSS partagé est correct
-import '../css/ConsommableList.css'; // Ou le nom que vous avez choisi
+import React, { useState, useEffect, useCallback } from 'react';
+import { showSuccessToast, showErrorAlert, showConfirmDialog } from '../utils/SwalAlerts';
+import Loader from '../component/Loader';
+import '../css/ConsommableList.css';
 
-// Optionnel: Icône pour le bouton "Ajouter"
-// import { FaPlus } from 'react-icons/fa';
+// --- Composant Formulaire ---
+const FournisseurForm = ({ onSave, onCancel, isLoading, initialData = null }) => {
+  const [formData, setFormData] = useState({
+    nom_entreprise: '',
+    ice: '',
+    num_compte_bancaire: '',
+    num_telephone: '',
+  });
+
+  const isEditMode = !!initialData;
+
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      setFormData({
+        nom_entreprise: initialData.nom_entreprise || '',
+        ice: initialData.ice || '',
+        num_compte_bancaire: initialData.num_compte_bancaire || '',
+        num_telephone: initialData.num_telephone || '',
+      });
+    } else {
+        setFormData({ nom_entreprise: '', ice: '', num_compte_bancaire: '', num_telephone: '' });
+    }
+  }, [initialData, isEditMode]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.nom_entreprise.trim()) {
+      showErrorAlert('Le nom de l\'entreprise est obligatoire.');
+      return;
+    }
+    onSave(formData, initialData ? initialData.id : null);
+  };
+
+  return (
+    <div className="add-form-container" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+      <form onSubmit={handleSubmit} style={{ background: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 5px 15px rgba(0,0,0,0.3)', width: '500px', maxWidth: '90%' }}>
+        <h3 style={{ textAlign: "center", marginBottom: "25px" }}>
+          {isEditMode ? "Modifier le fournisseur" : "Ajouter un fournisseur"}
+        </h3>
+        
+        <div style={{ marginBottom: '15px' }}>
+            <label htmlFor="nom_entreprise" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Nom de l'entreprise *</label>
+            <input type="text" id="nom_entreprise" name="nom_entreprise" value={formData.nom_entreprise} onChange={handleChange} style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} disabled={isLoading} required />
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+            <label htmlFor="ice" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>ICE</label>
+            <input type="text" id="ice" name="ice" value={formData.ice} onChange={handleChange} style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} disabled={isLoading} />
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+            <label htmlFor="num_compte_bancaire" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Numéro de compte bancaire</label>
+            <input type="text" id="num_compte_bancaire" name="num_compte_bancaire" value={formData.num_compte_bancaire} onChange={handleChange} style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} disabled={isLoading} />
+        </div>
+        <div style={{ marginBottom: '15px' }}>
+            <label htmlFor="num_telephone" style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Numéro de téléphone</label>
+            <input type="tel" id="num_telephone" name="num_telephone" value={formData.num_telephone} onChange={handleChange} style={{ width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} disabled={isLoading} />
+        </div>
+
+        <div style={{ marginTop: "25px", textAlign: "right", display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel} disabled={isLoading}>Annuler</button>
+          <button type="submit" className="btn btn-primary btn-sm" disabled={isLoading}>{isLoading ? "Sauvegarde..." : "Sauvegarder"}</button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 
 const FournisseurPageComponent = () => {
-  // Données spécifiques pour les fournisseurs (issues de votre capture d'écran)
-  const [data, setData] = useState([
-    { id: 1, nomEntreprise: 'TravauxB', ice: '0111457', telephone: '+212 573829163', compteBancaire: '5544552145', typeFournisseur: 'test2' },
-    { id: 2, nomEntreprise: 'Mouad', ice: '15645387469497', telephone: '+212 60606200', compteBancaire: '1212121212', typeFournisseur: 'informatique' },
-    { id: 3, nomEntreprise: 'houda', ice: '15645387469497', telephone: '+212 6124578', compteBancaire: '12345698700002699', typeFournisseur: 'test2' },
-    { id: 4, nomEntreprise: 'travauxOriental', ice: 'ncvmvp25158452', telephone: '+212 6124578', compteBancaire: '12345698700002699', typeFournisseur: 'test2' },
-    { id: 5, nomEntreprise: 'ahmed', ice: '15645387469497', telephone: '+212 4551142522', compteBancaire: '12454589784578', typeFournisseur: 'informatique' },
-  ]);
+  const [data, setData] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // États pour la pagination, la recherche, etc.
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Logique de filtrage et de pagination (recherche sur plusieurs champs)
+  const API_BASE_URL = 'http://127.0.0.1:8000/api';
+  const getToken = () => localStorage.getItem('authToken');
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const token = getToken();
+      const headers = { 'Accept': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) };
+      const response = await fetch(`${API_BASE_URL}/fournisseurs`, { headers });
+      if (!response.ok) throw new Error('Erreur lors du chargement des fournisseurs.');
+      const responseData = await response.json();
+      setData(responseData);
+    } catch (err) {
+      showErrorAlert(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleOpenAddForm = () => { setEditingItem(null); setShowForm(true); };
+  const handleOpenEditForm = (item) => { setEditingItem(item); setShowForm(true); };
+
+  const handleFormSave = async (formData, itemId) => {
+    setIsSubmitting(true);
+    const isEditMode = !!itemId;
+    const url = isEditMode ? `${API_BASE_URL}/fournisseurs/${itemId}` : `${API_BASE_URL}/fournisseurs`;
+    const method = isEditMode ? 'PUT' : 'POST';
+    const token = getToken();
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        const responseData = await response.json();
+        const errorMessage = responseData.message || (responseData.errors ? Object.values(responseData.errors).flat().join(' ') : `Erreur HTTP ${response.status}`);
+        throw new Error(errorMessage);
+      }
+      fetchData(); // Recharger les données
+      showSuccessToast(`Fournisseur ${isEditMode ? 'modifié' : 'ajouté'} avec succès`);
+      setShowForm(false);
+    } catch (err) {
+      showErrorAlert(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteItem = (itemId, itemName) => {
+    showConfirmDialog({
+      text: `Supprimer le fournisseur "${itemName}" ?`,
+      confirmButtonText: 'Oui, supprimer!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setIsSubmitting(true);
+        const token = getToken();
+        try {
+          const response = await fetch(`${API_BASE_URL}/fournisseurs/${itemId}`, {
+            method: 'DELETE',
+            headers: { 'Accept': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) },
+          });
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `Erreur HTTP ${response.status}`);
+          }
+          setData(prevData => prevData.filter(item => item.id !== itemId));
+          showSuccessToast('Fournisseur supprimé avec succès!');
+        } catch (err) {
+          showErrorAlert(err.message);
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+    });
+  };
+
   const filteredData = data.filter(item =>
-    item.nomEntreprise.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.ice.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.telephone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.typeFournisseur.toLowerCase().includes(searchTerm.toLowerCase())
+    (item.nom_entreprise && item.nom_entreprise.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (item.ice && item.ice.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
+  const currentItems = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
+  if (isLoading && data.length === 0) {
+    return <div className="data-table-view"><Loader /></div>;
+  }
+
   return (
-    <div className="data-table-view"> {/* Utilisation de la classe principale du CSS partagé */}
+    <div className="data-table-view">
+      {showForm && (
+        <FournisseurForm
+          onSave={handleFormSave}
+          onCancel={() => setShowForm(false)}
+          isLoading={isSubmitting}
+          initialData={editingItem}
+        />
+      )}
       <header className="content-header">
         <h1>Liste des fournisseurs</h1>
-        <button className="btn btn-primary btn-add">
-          {/* <FaPlus style={{ marginRight: '8px' }} /> Optionnel: Icône */}
+        <button className="btn btn-primary btn-add" onClick={handleOpenAddForm}>
           + Ajouter un fournisseur
         </button>
       </header>
-
-      <div className="controls-bar">
-        <div className="entries-selector">
-          Afficher{' '}
-          <select value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}>
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>{' '}
-          éléments
-        </div>
-        <div className="search-bar">
-          Rechercher: <input
-            type="text"
-            placeholder="Rechercher..."
-            value={searchTerm}
-            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-          />
-        </div>
-      </div>
-
+      <div className="controls-bar">{/* ... */}</div>
       <div className="table-container">
         <table>
           <thead>
             <tr>
-              <th>Nom de l'entreprise <span className="sort-arrow">↕</span></th>
-              <th>ICE <span className="sort-arrow">↕</span></th>
-              <th>Numéro de telephone <span className="sort-arrow">↕</span></th>
-              <th>Numéro de compte bancaire <span className="sort-arrow">↕</span></th>
-              <th>Type de fournisseur <span className="sort-arrow">↕</span></th>
-              <th>Modifier <span className="sort-arrow">↕</span></th>
-              <th>Effacer <span className="sort-arrow">↕</span></th>
+              <th>Nom de l'entreprise</th>
+              <th>ICE</th>
+              <th>Téléphone</th>
+              <th>Compte Bancaire</th>
+              <th>Modifier</th>
+              <th>Effacer</th>
             </tr>
           </thead>
           <tbody>
-            {currentItems.length > 0 ? (
+            {isLoading ? (
+                <tr><td colSpan="6"><Loader /></td></tr>
+            ) : currentItems.length > 0 ? (
               currentItems.map((item) => (
                 <tr key={item.id}>
-                  <td>{item.nomEntreprise}</td>
+                  <td>{item.nom_entreprise}</td>
                   <td>{item.ice}</td>
-                  <td>{item.telephone}</td>
-                  <td>{item.compteBancaire}</td>
-                  <td>{item.typeFournisseur}</td>
-                  <td><button className="btn btn-success btn-sm">Modifier</button></td>
-                  <td><button className="btn btn-danger btn-sm">Effacer</button></td>
+                  <td>{item.num_telephone}</td>
+                  <td>{item.num_compte_bancaire}</td>
+                  <td><button className="btn btn-success btn-sm" onClick={() => handleOpenEditForm(item)}>Modifier</button></td>
+                  <td><button className="btn btn-danger btn-sm" onClick={() => handleDeleteItem(item.id, item.nom_entreprise)}>Effacer</button></td>
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="7" style={{ textAlign: 'center' }}>Aucun fournisseur à afficher.</td> {/* colSpan est 7 ici */}
-              </tr>
+              <tr><td colSpan="6" style={{ textAlign: "center" }}>Aucun fournisseur à afficher.</td></tr>
             )}
           </tbody>
         </table>
       </div>
-
-      <footer className="content-footer-bar">
-        <div className="pagination-info">
-          Affichage de l'élément {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} à {Math.min(indexOfLastItem, filteredData.length)} sur {filteredData.length} éléments
-        </div>
-        <div className="pagination-controls">
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Précédent
-          </button>
-          {[...Array(totalPages).keys()].map(number => (
-             <button
-                key={number + 1}
-                className={`btn btn-page btn-sm ${currentPage === number + 1 ? 'active' : ''}`}
-                onClick={() => setCurrentPage(number + 1)}
-             >
-                {number + 1}
-             </button>
-          ))}
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages || totalPages === 0}
-          >
-            Suivant
-          </button>
-        </div>
-        <div className="export-buttons">
-          <button className="btn btn-secondary btn-sm">Export PDF</button>
-          <button className="btn btn-secondary btn-sm">Export Excel</button>
-        </div>
-      </footer>
+      <footer className="content-footer-bar">{/* ... */}</footer>
     </div>
   );
 };

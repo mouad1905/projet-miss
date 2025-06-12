@@ -1,100 +1,121 @@
 // frontend/src/components/AccountSettingsComponent.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext'; // Pour récupérer l'utilisateur actuel et son token
+import { showSuccessToast, showErrorAlert } from '../utils/SwalAlerts'; // Pour de belles notifications
 import '../css/ParametreUserPage.css'; // Styles spécifiques pour ce composant
 import Loader from '../component/Loader';
-// import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Pour afficher/cacher le mot de passe
 
 const AccountSettingsComponent = () => {
-  const { user, token } = useAuth(); // Supposons que useAuth() renvoie aussi le token
-  const API_BASE_URL = 'http://127.0.0.1:8000/api'; // Adaptez
+  const { user, token, fetchUser } = useAuth(); // Récupérer la fonction pour rafraîchir les données utilisateur
+  const API_BASE_URL = 'http://127.0.0.1:8000/api'; // Adaptez si nécessaire
 
   // Détails du compte
   const [username, setUsername] = useState('');
-  // const [email, setEmail] = useState(''); // Si vous voulez permettre la modification de l'email
 
   // Sécurité - Changement de mot de passe
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
-  const [usernameMessage, setUsernameMessage] = useState({ type: '', text: '' });
-  const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' });
-
   const [isLoadingUsername, setIsLoadingUsername] = useState(false);
   const [isLoadingPassword, setIsLoadingPassword] = useState(false);
 
-  // Pré-remplir les champs avec les informations de l'utilisateur connecté
+  // Pré-remplir le champ avec les informations de l'utilisateur connecté
   useEffect(() => {
     if (user) {
       setUsername(user.nom_utilisateur || '');
-      // setEmail(user.email || '');
     }
   }, [user]);
 
+  // Fonction pour mettre à jour le nom d'utilisateur
   const handleUpdateUsername = async (e) => {
     e.preventDefault();
-    setIsLoadingUsername(true);
-    setUsernameMessage({ type: '', text: '' });
-    // TODO: Appel API pour mettre à jour le nom d'utilisateur
-    // Exemple: PUT /api/user/profile-information (ou une route dédiée)
-    // Body: { nom_utilisateur: username }
-    // Headers: { Authorization: `Bearer ${token}` }
-    console.log("Mise à jour du nom d'utilisateur:", username);
-    try {
-        // Simuler un appel API
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // if (response.ok) {
-        //   setUsernameMessage({ type: 'success', text: 'Nom d\'utilisateur mis à jour avec succès !' });
-        //   // Mettre à jour l'objet user dans AuthContext si nécessaire
-        // } else {
-        //   const errorData = await response.json();
-        //   setUsernameMessage({ type: 'error', text: errorData.message || 'Erreur lors de la mise à jour.' });
-        // }
-        setUsernameMessage({ type: 'success', text: 'Nom d\'utilisateur mis à jour (simulation) !' });
-    } catch (error) {
-        setUsernameMessage({ type: 'error', text: 'Erreur de connexion.' });
+    if (username === user.nom_utilisateur) {
+        showErrorAlert("Le nom d'utilisateur n'a pas changé.");
+        return;
     }
-    setIsLoadingUsername(false);
+    setIsLoadingUsername(true);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/profile-information`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ nom_utilisateur: username })
+      });
+
+      const responseData = await response.json();
+      if (!response.ok) {
+        const errorMessage = responseData.message || (responseData.errors ? Object.values(responseData.errors).flat().join(' ') : `Erreur HTTP ${response.status}`);
+        throw new Error(errorMessage);
+      }
+      
+      showSuccessToast('Nom d\'utilisateur mis à jour avec succès !');
+      fetchUser(token); // Rafraîchit les données utilisateur dans le contexte global
+
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du nom d'utilisateur:", error);
+      showErrorAlert(error.message);
+    } finally {
+      setIsLoadingUsername(false);
+    }
   };
 
+  // Fonction pour changer le mot de passe
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    setPasswordMessage({ type: '', text: '' });
+
     if (newPassword !== confirmNewPassword) {
-      setPasswordMessage({ type: 'error', text: 'Les nouveaux mots de passe ne correspondent pas.' });
+      showErrorAlert('Les nouveaux mots de passe ne correspondent pas.');
       return;
     }
     if (newPassword.length < 8) {
-      setPasswordMessage({ type: 'error', text: 'Le nouveau mot de passe doit contenir au moins 8 caractères.' });
+      showErrorAlert('Le nouveau mot de passe doit contenir au moins 8 caractères.');
       return;
     }
+
     setIsLoadingPassword(true);
-    // TODO: Appel API pour changer le mot de passe
-    // Exemple: PUT /api/user/password
-    // Body: { current_password: currentPassword, password: newPassword, password_confirmation: confirmNewPassword }
-    // Headers: { Authorization: `Bearer ${token}` }
-    console.log("Changement de mot de passe pour:", { currentPassword, newPassword });
-     try {
-        // Simuler un appel API
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // if (response.ok) {
-        //   setPasswordMessage({ type: 'success', text: 'Mot de passe changé avec succès !' });
-        //   setCurrentPassword(''); setNewPassword(''); setConfirmNewPassword('');
-        // } else {
-        //   const errorData = await response.json();
-        //   setPasswordMessage({ type: 'error', text: errorData.message || 'Erreur lors du changement de mot de passe.' });
-        // }
-         setPasswordMessage({ type: 'success', text: 'Mot de passe changé (simulation) !' });
-         setCurrentPassword(''); setNewPassword(''); setConfirmNewPassword('');
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          password: newPassword,
+          password_confirmation: confirmNewPassword
+        })
+      });
+
+      const responseData = await response.json();
+      if (!response.ok) {
+        const errorMessage = responseData.message || (responseData.errors ? Object.values(responseData.errors).flat().join(' ') : `Erreur HTTP ${response.status}`);
+        throw new Error(errorMessage);
+      }
+      
+      showSuccessToast('Mot de passe changé avec succès !');
+      // Vider les champs après succès
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      
     } catch (error) {
-        setPasswordMessage({ type: 'error', text: 'Erreur de connexion.' });
+      console.error("Erreur lors du changement de mot de passe:", error);
+      showErrorAlert(error.message);
+    } finally {
+      setIsLoadingPassword(false);
     }
-    setIsLoadingPassword(false);
   };
 
   if (!user) {
-    return <p><Loader/></p>;
+    return <Loader />;
   }
 
   return (
@@ -113,12 +134,12 @@ const AccountSettingsComponent = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="admin"
+                required
               />
               <button type="submit" className="btn btn-primary btn-inline" disabled={isLoadingUsername}>
                 {isLoadingUsername ? '...' : 'Enregistrer'}
               </button>
             </div>
-            {usernameMessage.text && <p className={`message ${usernameMessage.type}`}>{usernameMessage.text}</p>}
           </div>
         </form>
       </div>
@@ -130,11 +151,12 @@ const AccountSettingsComponent = () => {
           <div className="form-group">
             <label htmlFor="currentPassword">Mot de passe actuel</label>
             <input
-              type="password" // Ajouter un bouton pour afficher/cacher
+              type="password"
               id="currentPassword"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Entrez votre mot de passe actuel"
+              required
             />
           </div>
           <div className="form-group">
@@ -145,6 +167,7 @@ const AccountSettingsComponent = () => {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Entrez votre nouveau mot de passe"
+              required
             />
           </div>
           <div className="form-group">
@@ -155,9 +178,9 @@ const AccountSettingsComponent = () => {
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
               placeholder="Confirmez votre nouveau mot de passe"
+              required
             />
           </div>
-          {passwordMessage.text && <p className={`message ${passwordMessage.type}`}>{passwordMessage.text}</p>}
           <div className="form-actions">
             <button type="submit" className="btn btn-primary" disabled={isLoadingPassword}>
               {isLoadingPassword ? 'Modification...' : 'Changer le mot de passe'}
