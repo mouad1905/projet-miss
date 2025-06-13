@@ -3,6 +3,7 @@
  
 use App\Http\Controllers\ArticleCategoryController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\DemandeController;
 use App\Http\Controllers\EmployeeTypeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BureauController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\test;
 
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,4 +53,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('fournisseurs', FournisseurController::class);
     Route::put('/user/profile-information', [ProfileController::class, 'updateProfile']);
     Route::put('/user/password', [ProfileController::class, 'changePassword']);
+    Route::post('/demandes/batch-update', [DemandeController::class, 'batchUpdate']);
+    Route::get('/demandes/my-demandes', [DemandeController::class, 'myDemandes']);
+    Route::apiResource('demandes', DemandeController::class);
+    Route::apiResource('users', UserController::class);
+    Route::get('/commandes', [DemandeController::class, 'getAcceptedDemandes']);
 });

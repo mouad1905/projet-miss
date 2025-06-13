@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('num_telephone')->nullable()->unique();
             $table->string('cin')->nullable()->unique();
+            
 
             // Colonne pour le rôle (par exemple : 'admin', 'employe', 'manager')
             $table->string('role')->default('employe'); // Mettez une valeur par défaut si pertinent

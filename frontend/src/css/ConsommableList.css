@@ -235,3 +235,50 @@ tr:hover {
 .add-form-container .form-actions .btn + .btn {
     margin-left: 10px;
 }
+.table-container tbody tr.selected-row {
+  background-color: #e6f0ff !important; /* Un bleu très clair, !important pour surcharger le hover */
+}
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 500;
+  color: white;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.status-badge.status-en-cours {
+  background-color: #ffc107; /* Jaune (warning) */
+  color: #212529; /* Texte foncé pour la lisibilité */
+}
+
+.status-badge.status-accepté {
+  background-color: #28a745; /* Vert (success) */
+}
+
+.status-badge.status-rejeté {
+  background-color: #dc3545; /* Rouge (danger) */
+}
+
+/* --- Styles pour les Boutons Désactivés (Ajout) --- */
+/*
+  Ceci rendra les boutons explicitement gris lorsqu'ils sont désactivés,
+  au lieu de simplement être transparents.
+*/
+.btn:disabled {
+  background-color: #adb5bd; /* Gris clair */
+  border-color: #adb5bd;
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.65;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Vous pouvez aussi cibler spécifiquement si besoin */
+.btn-success:disabled,
+.btn-danger:disabled {
+  background-color: #adb5bd;
+  border-color: #adb5bd;
+}

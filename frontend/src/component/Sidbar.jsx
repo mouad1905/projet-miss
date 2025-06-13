@@ -1,129 +1,131 @@
-
 // frontend/src/component/Sidebar.jsx
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import '../css/Sidebar.css'; // Assurez-vous que le chemin est correct
+import React, { useState, useEffect, useMemo } from 'react';
+import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import '../css/Sidebar.css';
 
-// Importez vos composants de page ici
+// Icônes
+import {
+  FaTachometerAlt, FaBoxOpen, FaCog, FaFileAlt, FaQrcode, FaUsers,
+  FaServicestack, FaBuilding, FaTruckMoving, FaUserCircle, FaBell,
+  FaClipboardList, FaFolderOpen, FaWarehouse, FaShoppingCart, FaSignOutAlt,
+  FaTags, FaCheckSquare, FaTasks
+} from 'react-icons/fa';
+import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
+
+// Pages importées
 import TableauDeBordPage from '../pages/TableauDeBordPage';
-import CategorieConsommablePage from '../pages/CategorieConsommablePage';
-import TypeEmployeurPage from '../pages/TypeEmployeurPage';
+import TypeEmployeurPageComponent from '../pages/TypeEmployeurPage';
 import ServicePageComponent from '../pages/ServicePage';
 import CategorieArticlePage from '../pages/CategorieArticlePage';
 import FournisseurPage from '../pages/FournisseurPage';
 import DivisionPage from '../pages/DivisionPage';
-import CategorieFournisseurPage from '../pages/CategorieFournisseurPage';
-import BureauPage from '../pages/BureauPage';
-import ArticleListPage from '../pages/ArticleListPage';
-import InventairePage from '../pages/InventairePage';
-// Importez d'autres pages si nécessaire
-
-// Importez des icônes (exemple avec React Icons - voir section suivante)
-import { FaTachometerAlt, FaBoxOpen, FaTags, FaCog, FaFileAlt, FaQrcode, FaUsers, FaServicestack, FaBuilding, FaTruckMoving, FaUserCircle, FaBell } from 'react-icons/fa'; // Font Awesome
-import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md'; // Material Design pour les chevrons
-import UserManagementPage from '../pages/GestionUsersPage';
 import BureauPageComponent from '../pages/BureauPage';
-import TypeEmployeurPageComponent from '../pages/TypeEmployeurPage';
+import ArticleListPage from '../pages/ArticleListPage';
+import UserManagementPage from '../pages/GestionUsersPage';
+import MesDemandesPageComponent from '../pages/MesDemandes';
+import LesDemandesPageComponent from '../pages/LesDemandes';
+import LesCommandesPageComponent from '../pages/LesCommandesPage';
 
-// Vos composants de page (s'ils sont très simples, sinon gardez-les dans /pages)
-// const PlaceholderPage = ({ title }) => <div style={{ padding: '20px' }}><h1>{title}</h1><p>Contenu de la page {title}.</p></div>;
+// Page temporaire
+const PlaceholderPage = ({ title }) => (
+  <div style={{ padding: '20px' }}>
+    <h1>{title}</h1>
+    <p>Contenu à venir.</p>
+  </div>
+);
 
-const SidebarAndContent = () => {
+const SidebarAndContent = ({ onLogout }) => {
   const location = useLocation();
-  const [activeItem, setActiveItem] = useState("");
-  const [referentielOpen, setReferentielOpen] = useState(false);
+  const [activeItem, setActiveItem] = useState('');
+  const [openSubmenus, setOpenSubmenus] = useState({ referentiel: false });
 
-  useEffect(() => {
-    const pathname = location.pathname;
-    // Logique pour déterminer activeItem et si referentielOpen doit être vrai
-    // (Adaptée de App.js/AppLayout)
-    let currentLabel = "";
-    const referentielSubItemsLabels = [
-      "Article", "Bureau", "Catégorie de fournisseur", "Division",
-      "Fournisseur", "Catégorie d'article", "Catégorie de consommable",
-      "Catégorie d'employer", "Service", "Utilisateur"
-    ];
-
-    if (pathname === '/tableau-de-bord' || pathname === '/') currentLabel = "Tableau de Bord";
-    else if (pathname.startsWith('/referentiel')) {
-      if (pathname === '/referentiel/categorie-consommable') currentLabel = "Catégorie de consommable";
-      else if (pathname === '/referentiel/article') currentLabel = "Article";
-      // ... autres sous-routes de référentiel
-      else currentLabel = "Référentiel"; // Cas où on est sur /referentiel (si c'est une page)
-      
-      // Trouver le label exact si c'est un sous-item pour l'état actif
-      const subItemMatch = menuItems.find(item => item.label === "Référentiel")
-                                  ?.subItems?.find(sub => sub.href === pathname);
-      if (subItemMatch) currentLabel = subItemMatch.label;
-
-    } else if (pathname === '/inventaire') currentLabel = "Inventaire";
-    else if (pathname === '/generation-qr') currentLabel = "Génération QR";
-    // ... ajoutez d'autres routes principales
-
-    setActiveItem(currentLabel);
-    setReferentielOpen(referentielSubItemsLabels.includes(currentLabel) || currentLabel === "Référentiel");
-
-  }, [location.pathname]);
-
-  // Définition des items du menu avec les icônes
-  const menuItems = [
+  const menuItems = useMemo(() => [
+    { label: "Acceuil", href: "/acceuil", icon: <FaTachometerAlt /> },
     { label: "Tableau de Bord", href: "/tableau-de-bord", icon: <FaTachometerAlt /> },
     {
       label: "Référentiel",
       icon: <FaCog />,
-      href: "#referentiel", // Pas de navigation directe si c'est juste un groupeur
-      isParent: true,
+      href: "#referentiel",
+      key: "referentiel",
       subItems: [
         { label: "Article", href: "/referentiel/articles", icon: <FaFileAlt /> },
         { label: "Bureau", href: "/referentiel/bureaux", icon: <FaBuilding /> },
-        { label: "Division", href: "/referentiel/divisions", icon: <FaUsers /> }, // Exemple
+        { label: "Catégorie de fournisseur", href: "/referentiel/categorie-fournisseur", icon: <FaTags /> },
+        { label: "Division", href: "/referentiel/divisions", icon: <FaUsers /> },
         { label: "Fournisseur", href: "/referentiel/fournisseurs", icon: <FaTruckMoving /> },
-        { label: "Catégorie d'article", href: "/referentiel/categorie-article", icon: <FaBoxOpen /> }, // Répété, ajustez
+        { label: "Catégorie d'article", href: "/referentiel/categorie-article", icon: <FaBoxOpen /> },
+        { label: "Catégorie de consommable", href: "/referentiel/categorie-consommable", icon: <FaTags /> },
         { label: "Catégorie d'employer", href: "/referentiel/type-employeur", icon: <FaUsers /> },
-        { label: "Service", href: "referentiel/services", icon: <FaServicestack /> },
+        { label: "Service", href: "/referentiel/services", icon: <FaServicestack /> },
         { label: "Utilisateur", href: "/referentiel/utilisateur", icon: <FaUserCircle /> },
       ],
     },
-    { label: "Inventaire", href: "/inventaire", icon: <FaBoxOpen /> },
     { label: "Génération QR", href: "/generation-qr", icon: <FaQrcode /> },
-  ];
+    { label: "Mes Demandes", href: "/mes-demandes", icon: <FaClipboardList /> },
+    { label: "Les Demandes", href: "/les-demandes", icon: <FaFolderOpen /> },
+    { label: "Les Commandes", href: "/les-commandes", icon: <FaShoppingCart /> },
+    { label: "Mes Commandes livré", href: "/mes-commandes-livres", icon: <FaCheckSquare /> },
+    { label: "Les Commandes livrés", href: "/les-commandes-livres", icon: <FaTasks /> },
+  ], []);
 
+  useEffect(() => {
+    const pathname = location.pathname;
+    let currentLabel = "";
 
-  const handleToggleReferentiel = (e) => {
-    // Empêcher la navigation si le lien principal du référentiel est cliqué et qu'il n'a pas de page propre
-    if (e.currentTarget.getAttribute('href') === '#referentiel') {
-        e.preventDefault();
+    for (const item of menuItems) {
+      if (item.href === pathname) {
+        currentLabel = item.label;
+        break;
+      }
+      if (item.subItems) {
+        const subItemMatch = item.subItems.find(sub => sub.href === pathname);
+        if (subItemMatch) {
+          currentLabel = subItemMatch.label;
+          break;
+        }
+      }
     }
-    setReferentielOpen(!referentielOpen);
-  };
 
+    setActiveItem(currentLabel);
+
+    const parentOfActive = menuItems.find(item =>
+      item.subItems?.some(sub => sub.label === currentLabel)
+    );
+    if (parentOfActive) {
+      setOpenSubmenus(prev => ({ ...prev, [parentOfActive.key]: true }));
+    }
+  }, [location.pathname, menuItems]);
+
+  const handleToggleSubmenu = (e, key) => {
+    e.preventDefault();
+    setOpenSubmenus(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <aside className="sidebar">
-        <div className="sidebar-header">
-          Municipality Inventory
-        </div>
+        <div className="sidebar-header">Municipality Inventory</div>
         <nav className="sidebar-nav">
           <ul>
             {menuItems.map((item) => (
               <li
                 key={item.label}
-                className={`
-                  ${item.subItems ? 'has-submenu' : ''}
-                  ${activeItem === item.label || (item.subItems && item.subItems.some(sub => sub.label === activeItem)) ? 'active-parent' : ''}
-                `}
+                className={`${item.subItems ? 'has-submenu' : ''} ${activeItem === item.label || (item.subItems && item.subItems.some(sub => sub.label === activeItem)) ? 'active-parent' : ''}`}
               >
                 <Link
                   to={item.href}
-                  onClick={item.label === "Référentiel" ? handleToggleReferentiel : undefined}
-                  className={activeItem === item.label && !item.subItems ? 'active' : ''}
+                  onClick={item.subItems ? (e) => handleToggleSubmenu(e, item.key) : undefined}
+                  className={activeItem === item.label ? 'active' : ''}
                 >
                   {item.icon && <span className="sidebar-icon-wrapper">{item.icon}</span>}
                   <span>{item.label}</span>
-                  {item.subItems && (referentielOpen ? <MdKeyboardArrowDown className="chevron-icon" /> : <MdKeyboardArrowRight className="chevron-icon" />)}
+                  {item.subItems && (
+                    openSubmenus[item.key]
+                      ? <MdKeyboardArrowDown className="chevron-icon" />
+                      : <MdKeyboardArrowRight className="chevron-icon" />
+                  )}
                 </Link>
-                {item.label === "Référentiel" && item.subItems && referentielOpen && (
+                {item.subItems && openSubmenus[item.key] && (
                   <ul className="submenu">
                     {item.subItems.map((subItem) => (
                       <li key={subItem.label} className={activeItem === subItem.label ? 'active' : ''}>
@@ -139,45 +141,53 @@ const SidebarAndContent = () => {
             ))}
           </ul>
         </nav>
+
         <div className="sidebar-user-profile">
           <FaUserCircle size={24} className="user-actions-icon" />
           <div className="notification-area">
             <FaBell size={24} className="user-actions-icon" />
             <span className="notification-badge">1</span>
           </div>
+          {onLogout && (
+            <button onClick={onLogout} title="Déconnexion" className="logout-button">
+              <FaSignOutAlt size={22} />
+            </button>
+          )}
         </div>
       </aside>
 
-      <main 
-        style={{ 
-          flexGrow: 1, 
-          padding: '20px', 
-          backgroundColor: '#f0f2f5',
-          marginLeft: '260px' /* AJOUTEZ CECI ! (doit correspondre à la largeur de .sidebar) */
-        }}
-      >
+      <main style={{ flexGrow: 1, padding: '20px', backgroundColor: '#f0f2f5', marginLeft: '260px' }}>
         <Routes>
           <Route path="/tableau-de-bord" element={<TableauDeBordPage />} />
+          <Route path="/acceuil" element={<TableauDeBordPage />} />
+
+          {/* Référentiel */}
           <Route path="/referentiel/articles" element={<ArticleListPage />} />
-          <Route path="/referentiel/categorie-employer" element={<TypeEmployeurPage />} />
-          <Route path="/referentiel/services" element={<ServicePageComponent />} />
-          <Route path="/referentiel/categorie-article" element={<CategorieArticlePage />} />
-          <Route path="/referentiel/fournisseurs" element={<FournisseurPage />} />
-          <Route path="/referentiel/divisions" element={<DivisionPage />} /> 
-          <Route path="/referentiel/bureaux" element={<BureauPage />} />
-          <Route path="/referentiel/utilisateur" element={<UserManagementPage />} />
-          <Route path="/inventaire" element={<InventairePage />} /> 
           <Route path="/referentiel/bureaux" element={<BureauPageComponent />} />
+          <Route path="/referentiel/divisions" element={<DivisionPage />} />
+          <Route path="/referentiel/fournisseurs" element={<FournisseurPage />} />
+          <Route path="/referentiel/categorie-article" element={<CategorieArticlePage />} />
           <Route path="/referentiel/type-employeur" element={<TypeEmployeurPageComponent />} />
-          {/* Ajoutez les Routes pour les autres pages de référentiel et principales */}
-          {/* Exemple : <Route path="/referentiel/bureau" element={<PlaceholderPage title="Bureau" />} /> */}
-          {/* Route par défaut */}
-          <Route path="/" element={<TableauDeBordPage />} />
+          <Route path="/referentiel/services" element={<ServicePageComponent />} />
+          <Route path="/referentiel/utilisateur" element={<UserManagementPage />} />
+          <Route path="/referentiel/categorie-fournisseur" element={<PlaceholderPage title="Catégorie de Fournisseur" />} />
+          <Route path="/referentiel/categorie-consommable" element={<PlaceholderPage title="Catégorie de Consommable" />} />
+
+          {/* Autres pages */}
+          <Route path="/generation-qr" element={<PlaceholderPage title="Génération QR" />} />
+          <Route path="/mes-demandes" element={<MesDemandesPageComponent />} />
+          <Route path="/les-demandes" element={<LesDemandesPageComponent />} />
+          <Route path="/les-commandes" element={<LesCommandesPageComponent />} />
+          <Route path="/mes-commandes-livres" element={<PlaceholderPage title="Mes Commandes livrés" />} />
+          <Route path="/les-commandes-livres" element={<PlaceholderPage title="Les Commandes livrés" />} />
+
+          {/* Redirection */}
+          <Route path="/" element={<Navigate to="/tableau-de-bord" replace />} />
+          <Route path="*" element={<PlaceholderPage title="404 - Page non trouvée" />} />
         </Routes>
       </main>
     </div>
   );
 };
 
-export default SidebarAndContent; // Notez que ce composant gère maintenant tout
->>>>>>> 7d4b199080f34f9dc98f9b91efa9f0a83c0291a2
+export default SidebarAndContent;

@@ -1,27 +1,27 @@
-// frontend/src/pages/UserManagementPage.jsx
+// src/pages/UserManagementPage.jsx
 import React, { useState } from 'react';
 import AccountSettingsComponent from './ParametreUserPage'; // À créer
-import AddUserPageComponent from './AjouterUserPage'; // Celui que nous avons pour l'ajout
+import AddUserPageComponent from './AjouterUserPage';
+import UserListComponent from './UserList'; // Celui que nous avons pour l'ajout
 import '../css/ConsommableList.css'; // Vos styles partagés
-import '../css/GestionUserPage.css'; // Styles spécifiques pour cette page
+import '../css/GestionUserPage.css'; // CSS pour les onglets
 
 const UserManagementPage = () => {
-  const [activeTab, setActiveTab] = useState('settings'); // 'settings' ou 'addUser'
+  // 'list' devient l'onglet par défaut
+  const [activeTab, setActiveTab] = useState('list');
 
   return (
-    <div className="data-table-view user-management-page"> {/* Utilisation de classes existantes + spécifiques */}
+    <div className="data-table-view user-management-page">
       <header className="content-header">
-        {/* Le titre pourrait changer en fonction de l'onglet actif */}
-        <h1>{activeTab === 'settings' ? 'Paramètres du compte' : 'Ajouter un utilisateur'}</h1>
-        {/* Pas de bouton "Ajouter" global ici, car chaque section a ses propres actions */}
+        <h1>Gestion des utilisateurs</h1>
       </header>
 
       <div className="user-management-tabs">
         <button
-          className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('settings')}
+          className={`tab-button ${activeTab === 'list' ? 'active' : ''}`}
+          onClick={() => setActiveTab('list')}
         >
-          Paramètres du compte
+          Liste des utilisateurs
         </button>
         <button
           className={`tab-button ${activeTab === 'addUser' ? 'active' : ''}`}
@@ -29,12 +29,18 @@ const UserManagementPage = () => {
         >
           Ajouter un utilisateur
         </button>
-        {/* Vous pourriez cacher "Ajouter un utilisateur" si l'utilisateur actuel n'est pas admin */}
+        <button
+          className={`tab-button ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('settings')}
+        >
+          Mes Paramètres
+        </button>
       </div>
 
       <div className="user-management-content">
-        {activeTab === 'settings' && <AccountSettingsComponent />}
+        {activeTab === 'list' && <UserListComponent />}
         {activeTab === 'addUser' && <AddUserPageComponent />}
+        {activeTab === 'settings' && <AccountSettingsComponent />}
       </div>
     </div>
   );
