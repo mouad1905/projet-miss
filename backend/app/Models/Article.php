@@ -27,6 +27,7 @@ class Article extends Model
     {
         return $this->belongsTo(ArticleCategory::class);
     }
+    public function demandes() { return $this->hasMany(Demande::class); }
 
     // Les relations vers ConsommableCategory et StockageCategory sont supprimées
 }

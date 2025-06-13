@@ -16,6 +16,7 @@ class Demande extends Model
         'quantite_demandee',
         'date_demande',
         'status', // Le statut peut être mis à jour
+        'statut_livraison',
         'objet_marche',
         'reference_marche',
         'fournisseur_id', // Le fournisseur peut être mis à jour
@@ -24,7 +25,7 @@ class Demande extends Model
 
     protected $casts = [ 'date_demande' => 'date' ];
 
-    public function user() { return $this->belongsTo(User::class); }
+   public function user() { return $this->belongsTo(User::class); }
     public function article() { return $this->belongsTo(Article::class); }
-    public function fournisseur() { return $this->belongsTo(Fournisseur::class); }
+    public function fournisseur() { return $this->belongsTo(Fournisseur::class); } 
 }

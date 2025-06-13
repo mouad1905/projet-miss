@@ -29,3 +29,14 @@
 .status-badge.status-en-attente {
     background-color: #6c757d; /* Gris */
 }
+.file-upload-input {
+  display: none;
+}
+
+/* Style pour le nom du fichier sélectionné */
+.file-name-display {
+  margin-left: 10px;
+  font-size: 0.85em;
+  color: #6c757d;
+  font-style: italic;
+}

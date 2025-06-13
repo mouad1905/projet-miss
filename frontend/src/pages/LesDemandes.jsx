@@ -1,8 +1,9 @@
 // frontend/src/pages/LesDemandesPageComponent.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { showSuccessToast, showErrorAlert } from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
-import '../css/ConsommableList.css';
+import '../css/ConsommableList.css'; // Assurez-vous que ce chemin est correct
+import '../css/DemandeForm.css'; 
 
 const LesDemandesPageComponent = () => {
   const [demandes, setDemandes] = useState([]);
@@ -10,8 +11,9 @@ const LesDemandesPageComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // État pour stocker les changements faits par l'admin
   const [changes, setChanges] = useState({});
+  const [filesToUpload, setFilesToUpload] = useState({});
+  const fileInputRefs = useRef({});
 
   const API_BASE_URL = 'http://127.0.0.1:8000/api';
   const getToken = () => localStorage.getItem('authToken');
@@ -23,8 +25,8 @@ const LesDemandesPageComponent = () => {
       const headers = { 'Accept': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) };
       
       const [demandesRes, fournisseursRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/demandes`, { headers }), // Récupère toutes les demandes
-        fetch(`${API_BASE_URL}/fournisseurs`, { headers }) // Récupère tous les fournisseurs
+        fetch(`${API_BASE_URL}/demandes`, { headers }),
+        fetch(`${API_BASE_URL}/fournisseurs`, { headers })
       ]);
 
       if (!demandesRes.ok) throw new Error('Erreur de chargement des demandes.');
@@ -41,40 +43,37 @@ const LesDemandesPageComponent = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Gère le changement d'un select dans une ligne
   const handleRowChange = (demandeId, field, value) => {
-    setChanges(prev => ({
-      ...prev,
-      [demandeId]: {
-        ...prev[demandeId],
-        [field]: value
-      }
-    }));
+    setChanges(prev => ({ ...prev, [demandeId]: { ...prev[demandeId], [field]: value }}));
   };
 
-  // Envoie toutes les modifications au backend
-  const handleConfirmChanges = async () => {
-    const updates = Object.keys(changes).map(id => ({ id, ...changes[id] }));
-    
-    if (updates.length === 0) {
-      showErrorAlert('Aucune modification à enregistrer.');
-      return;
-    }
+  const handleFileChange = (demandeId, file) => {
+    setFilesToUpload(prev => ({ ...prev, [demandeId]: file }));
+  };
 
+  const handleConfirmChanges = async () => {
+    const files = Object.entries(filesToUpload);
+    if (Object.keys(changes).length === 0 && files.length === 0) {
+        return showErrorAlert('Aucune modification à enregistrer.');
+    }
     setIsSubmitting(true);
+    const formData = new FormData();
+    formData.append('updates', JSON.stringify(changes));
+    files.forEach(([id, file]) => {
+      formData.append(`files[${id}]`, file);
+    });
     try {
         const response = await fetch(`${API_BASE_URL}/demandes/batch-update`, {
-            method: 'POST', // ou PUT
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${getToken()}` },
-            body: JSON.stringify({ updates: updates }),
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+            body: formData,
         });
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Erreur lors de la mise à jour.');
-        }
+        const responseData = await response.json();
+        if (!response.ok) throw new Error(responseData.message || 'Erreur lors de la mise à jour.');
         showSuccessToast('Modifications enregistrées avec succès!');
-        setChanges({}); // Vider les changements après sauvegarde
-        fetchData(); // Recharger les données
+        setChanges({});
+        setFilesToUpload({});
+        fetchData();
     } catch (err) {
         showErrorAlert(err.message);
     } finally {
@@ -86,10 +85,7 @@ const LesDemandesPageComponent = () => {
 
   return (
     <div className="data-table-view">
-      <header className="content-header">
-        <h1>Liste des demandes</h1>
-      </header>
-      <div className="controls-bar">{/* Filtres pour "Les Demandes" */}</div>
+      <header className="content-header"><h1>Liste des demandes</h1></header>
       <div className="table-container">
         <table>
           <thead>
@@ -109,47 +105,43 @@ const LesDemandesPageComponent = () => {
               demandes.map((item) => {
                 const currentStatus = changes[item.id]?.status ?? item.status;
                 const currentFournisseur = changes[item.id]?.fournisseur_id ?? item.fournisseur_id;
+                const selectedFileName = filesToUpload[item.id]?.name;
+                if (!fileInputRefs.current[item.id]) { fileInputRefs.current[item.id] = React.createRef(); }
                 return (
                   <tr key={item.id}>
                     <td>{item.article?.libelle || 'N/A'}</td>
                     <td>{item.quantite_demandee}</td>
                     <td>{item.user?.service?.libelle || 'N/A'}</td>
-                    <td>{`${item.user?.prenom || ''} ${item.user?.nom || ''}`}</td>
+                    <td>{`${item.user?.prenom || ''} ${item.user?.nom || 'N/A'}`}</td>
                     <td>{new Date(item.date_demande).toLocaleDateString()}</td>
                     <td>
-                      <select 
-                        value={currentStatus} 
-                        onChange={(e) => handleRowChange(item.id, 'status', e.target.value)}
-                        className="table-select"
-                      >
+                      <select value={currentStatus} onChange={(e) => handleRowChange(item.id, 'status', e.target.value)} className="table-select">
                         <option value="En cours">En cours</option>
                         <option value="Accepté">Accepté</option>
                         <option value="Rejeté">Rejeté</option>
                       </select>
                     </td>
                     <td>
-                      <select 
-                        value={currentFournisseur || ''}
-                        onChange={(e) => handleRowChange(item.id, 'fournisseur_id', e.target.value)}
-                        className="table-select"
-                      >
+                      <select value={currentFournisseur || ''} onChange={(e) => handleRowChange(item.id, 'fournisseur_id', e.target.value)} className="table-select">
                         <option value="">Choisir un fournisseur</option>
                         {fournisseursList.map(f => <option key={f.id} value={f.id}>{f.nom_entreprise}</option>)}
                       </select>
                     </td>
-                    <td><button className="btn btn-secondary btn-sm">Fichier</button></td>
+                    <td>
+                      <input type="file" ref={fileInputRefs.current[item.id]} className="file-upload-input" onChange={(e) => handleFileChange(item.id, e.target.files[0])} />
+                      <button className="btn btn-secondary btn-sm" onClick={() => fileInputRefs.current[item.id].current.click()}>{selectedFileName ? 'Changer' : 'Choisir'}</button>
+                      {selectedFileName && <span className="file-name-display">{selectedFileName}</span>}
+                    </td>
                   </tr>
                 )
               })
-            ) : (
-              <tr><td colSpan="8" style={{ textAlign: "center" }}>Aucune demande à traiter.</td></tr>
-            )}
+            ) : ( <tr><td colSpan="8" style={{ textAlign: "center" }}>Aucune demande à traiter.</td></tr> )}
           </tbody>
         </table>
       </div>
       <div style={{ textAlign: 'right', marginTop: '20px' }}>
         <button className="btn btn-primary" onClick={handleConfirmChanges} disabled={isSubmitting}>
-          {isSubmitting ? 'Enregistrement...' : 'Confirmer les modifications'}
+          {isSubmitting ? 'Enregistrement...' : 'Confirmer les demandes'}
         </button>
       </div>
     </div>

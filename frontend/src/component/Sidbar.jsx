@@ -25,6 +25,8 @@ import UserManagementPage from '../pages/GestionUsersPage';
 import MesDemandesPageComponent from '../pages/MesDemandes';
 import LesDemandesPageComponent from '../pages/LesDemandes';
 import LesCommandesPageComponent from '../pages/LesCommandesPage';
+import MesCommandesLivresPageComponent from '../pages/MesCommandesLivresPage';
+import LesCommandesLivresPageComponent from '../pages/LesCommandesLivresPage';
 
 // Page temporaire
 const PlaceholderPage = ({ title }) => (
@@ -178,8 +180,8 @@ const SidebarAndContent = ({ onLogout }) => {
           <Route path="/mes-demandes" element={<MesDemandesPageComponent />} />
           <Route path="/les-demandes" element={<LesDemandesPageComponent />} />
           <Route path="/les-commandes" element={<LesCommandesPageComponent />} />
-          <Route path="/mes-commandes-livres" element={<PlaceholderPage title="Mes Commandes livrés" />} />
-          <Route path="/les-commandes-livres" element={<PlaceholderPage title="Les Commandes livrés" />} />
+          <Route path="/mes-commandes-livres" element={<MesCommandesLivresPageComponent /> } />
+          <Route path="/les-commandes-livres" element={<LesCommandesLivresPageComponent />} />
 
           {/* Redirection */}
           <Route path="/" element={<Navigate to="/tableau-de-bord" replace />} />

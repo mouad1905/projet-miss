@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers; // Assurez-vous que ce namespace correspond à l'emplacement de votre fichier
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Demande;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class DemandeController extends Controller
@@ -17,18 +18,18 @@ class DemandeController extends Controller
     public function index()
     {
         try {
-            // Charger les relations nécessaires pour l'affichage complet
+            // Charger les relations nécessaires pour l'affichage complet.
+            // La relation imbriquée 'user.service' récupère aussi le service de l'utilisateur.
             $demandes = Demande::with(['user.service', 'article', 'fournisseur'])->latest('date_demande')->get();
             return response()->json($demandes);
         } catch (\Throwable $e) {
-            Log::error('Erreur dans DemandeController@index: ' . $e->getMessage());
+            Log::error('Erreur dans DemandeController@index: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json(['message' => 'Erreur interne du serveur lors de la récupération de toutes les demandes.'], 500);
         }
     }
 
     /**
-     * Récupère uniquement les demandes de l'utilisateur authentifié
-     * (pour la vue "Mes Demandes").
+     * Récupère uniquement les demandes de l'utilisateur authentifié.
      */
     public function myDemandes()
     {
@@ -45,7 +46,25 @@ class DemandeController extends Controller
     }
 
     /**
-     * Crée une nouvelle demande pour l'utilisateur authentifié.
+     * Récupère toutes les demandes qui ont été acceptées pour la page "Les Commandes".
+     */
+    public function getAcceptedDemandes()
+    {
+        try {
+            $demandesAcceptees = Demande::with(['user', 'article', 'fournisseur'])
+                ->where('status', 'Accepté')
+                ->latest('date_demande')
+                ->get();
+            return response()->json($demandesAcceptees);
+        } catch (\Throwable $e) {
+            Log::error('Erreur dans DemandeController@getAcceptedDemandes: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur interne du serveur lors de la récupération des commandes.'], 500);
+        }
+    }
+
+
+    /**
+     * Crée une nouvelle demande.
      */
     public function store(Request $request)
     {
@@ -54,9 +73,7 @@ class DemandeController extends Controller
             'quantite_demandee' => 'required|integer|min:1',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        if ($validator->fails()) { return response()->json(['errors' => $validator->errors()], 422); }
 
         try {
             $demande = Demande::create([
@@ -73,10 +90,19 @@ class DemandeController extends Controller
             return response()->json(['message' => 'Erreur interne du serveur lors de la création de la demande.'], 500);
         }
     }
+    
+    /**
+     * Affiche une demande spécifique.
+     */
+    public function show(Demande $demande)
+    {
+        $demande->load(['user.service', 'article', 'fournisseur']);
+        return response()->json($demande);
+    }
+
 
     /**
-     * Met à jour une demande spécifique.
-     * Utilisé par l'utilisateur pour modifier sa propre demande.
+     * Met à jour une demande spécifique (par l'utilisateur).
      */
     public function update(Request $request, Demande $demande)
     {
@@ -90,9 +116,7 @@ class DemandeController extends Controller
             'quantite_demandee' => 'required|integer|min:1',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        if ($validator->fails()) { return response()->json(['errors' => $validator->errors()], 422); }
 
         try {
             $demande->update($validator->validated());
@@ -110,21 +134,26 @@ class DemandeController extends Controller
     public function batchUpdate(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'updates' => 'required|array',
-            'updates.*.id' => 'required|integer|exists:demandes,id',
-            'updates.*.status' => 'nullable|string|in:Accepté,Rejeté,En cours',
-            'updates.*.fournisseur_id' => 'nullable|integer|exists:fournisseurs,id',
+            'updates' => 'required|json',
+            'files.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
+        if ($validator->fails()) { return response()->json(['errors' => $validator->errors()], 422); }
+
+        $updates = json_decode($request->updates, true);
 
         try {
-            foreach ($request->updates as $updateData) {
-                $demande = Demande::find($updateData['id']);
+            foreach ($updates as $id => $updateData) {
+                $demande = Demande::find($id);
                 if ($demande) {
                     $demande->update($updateData);
+
+                    if ($request->hasFile("files.{$id}")) {
+                        $file = $request->file("files.{$id}");
+                        $path = $file->store('demande_fichiers', 'public');
+                        $demande->fichier_path = $path;
+                        $demande->save();
+                    }
                 }
             }
             return response()->json(['message' => 'Demandes mises à jour avec succès!']);
@@ -146,25 +175,112 @@ class DemandeController extends Controller
 
         try {
             $demande->delete();
-            return response()->json(null, 204);
+            return response()->json(null, 204); // 204 No Content
         } catch (\Throwable $e) {
             Log::error('Erreur dans DemandeController@destroy pour ID ' . $demande->id . ': ' . $e->getMessage());
             return response()->json(['message' => 'Erreur interne du serveur lors de la suppression.'], 500);
         }
     }
-    public function getAcceptedDemandes()
+    public function getDeliveredCommands()
     {
         try {
-            // On récupère les demandes où le statut est 'Accepté'
-            $demandesAcceptees = Demande::with(['user', 'article', 'fournisseur'])
+            $demandesAcceptees = Demande::with(['user.service.division', 'article', 'fournisseur'])
                 ->where('status', 'Accepté')
                 ->latest('date_demande')
                 ->get();
                 
             return response()->json($demandesAcceptees);
         } catch (\Throwable $e) {
-            Log::error('Erreur dans DemandeController@getAcceptedDemandes: ' . $e->getMessage());
-            return response()->json(['message' => 'Erreur interne du serveur lors de la récupération des commandes.'], 500);
+            Log::error('Erreur dans DemandeController@getDeliveredCommands: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur interne du serveur.'], 500);
         }
     }
+
+    /**
+     * Met à jour le statut de livraison d'une demande spécifique (par l'utilisateur).
+     */
+    public function updateDeliveryStatus(Request $request, Demande $demande)
+    {
+        // Sécurité : seul le demandeur peut mettre à jour le statut de livraison de sa propre demande.
+        if ($demande->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Action non autorisée.'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'statut_livraison' => 'required|string|in:Reçu,Non reçu',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $demande->statut_livraison = $request->statut_livraison;
+            $demande->save();
+            return response()->json($demande);
+        } catch (\Throwable $e) {
+            Log::error('Erreur dans DemandeController@updateDeliveryStatus pour ID ' . $demande->id . ': ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur interne du serveur.'], 500);
+        }
+    }
+    public function getMyDeliveredCommands()
+    {
+         try {
+            $demandes = Demande::with('article')
+                ->where('user_id', Auth::id())
+                // On récupère les commandes marquées comme "Livré" par l'admin,
+                // ou celles que l'utilisateur a déjà traitées.
+                ->whereIn('statut_livraison', ['Livré', 'Reçu', 'Non reçu'])
+                ->latest('date_demande')
+                ->get();
+            return response()->json($demandes);
+        } catch (\Throwable $e) {
+            Log::error('Erreur dans DemandeController@getMyDeliveredCommands: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur interne du serveur.'], 500);
+        }
+    }
+
+    /**
+     * Met à jour le statut de réception d'une demande spécifique (par l'utilisateur).
+     */
+    public function updateReceptionStatus(Request $request, Demande $demande)
+    {
+        // Sécurité : seul le demandeur peut mettre à jour le statut de réception.
+        if ($demande->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Action non autorisée.'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'statut_livraison' => 'required|string|in:Reçu,Non reçu',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $demande->statut_livraison = $request->statut_livraison;
+            $demande->save();
+            $demande->load('article'); // Recharger la relation pour une réponse cohérente
+            return response()->json($demande);
+        } catch (\Throwable $e) {
+            Log::error('Erreur dans DemandeController@updateReceptionStatus pour ID ' . $demande->id . ': ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur interne du serveur.'], 500);
+        }
+    }
+    public function getReadyForDelivery()
+    {
+        try {
+            $demandes = Demande::with(['user', 'article', 'fournisseur'])
+                ->where('status', 'Accepté')
+                ->where('statut_livraison', 'En attente de livraison')
+                ->latest('date_demande')
+                ->get();
+            return response()->json($demandes);
+        } catch (\Throwable $e) {
+            Log::error('Erreur dans DemandeController@getReadyForDelivery: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur interne du serveur.'], 500);
+        }
+    }
+    
 }

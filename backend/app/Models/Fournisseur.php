@@ -44,6 +44,7 @@ class Fournisseur extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
+    public function demandes() { return $this->hasMany(Demande::class); }
 
     // Si un fournisseur avait des relations (par exemple, avec des articles),
     // elles seraient définies ici. Pour l'instant, il n'y en a pas.

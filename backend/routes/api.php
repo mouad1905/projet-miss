@@ -57,5 +57,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/demandes/my-demandes', [DemandeController::class, 'myDemandes']);
     Route::apiResource('demandes', DemandeController::class);
     Route::apiResource('users', UserController::class);
-    Route::get('/commandes', [DemandeController::class, 'getAcceptedDemandes']);
+    Route::get('/commandes', [DemandeController::class, 'getReadyForDelivery']);
+    Route::post('/commandes/mark-delivered', [DemandeController::class, 'markAsDelivered']);
+    Route::get('/commandes-livres', [DemandeController::class, 'getDeliveredCommands']);
+    Route::get('/commandes', [DemandeController::class, 'getReadyForDelivery']);
+    Route::get('/mes-commandes-livres', [DemandeController::class, 'getMyDeliveredCommands']);
+    Route::patch('/demandes/{demande}/reception-status', [DemandeController::class, 'updateReceptionStatus']);
 });

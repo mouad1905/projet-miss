@@ -9,7 +9,6 @@ import '../css/DemandeForm.css';
 const DemandeForm = ({ onSave, onCancel, isLoading, initialData = null, articlesList = [] }) => {
   const [formData, setFormData] = useState({ article_id: '', quantite_demandee: '1' });
   const isEditMode = !!initialData;
-
   useEffect(() => {
     if (isEditMode && initialData) {
       setFormData({ article_id: initialData.article_id || '', quantite_demandee: initialData.quantite_demandee || '1' });
@@ -17,38 +16,20 @@ const DemandeForm = ({ onSave, onCancel, isLoading, initialData = null, articles
       setFormData({ article_id: '', quantite_demandee: '1' });
     }
   }, [initialData, isEditMode]);
-
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.article_id) return showErrorAlert('Veuillez choisir un article.');
     if (parseInt(formData.quantite_demandee, 10) <= 0) return showErrorAlert('La quantité doit être supérieure à zéro.');
     onSave(formData, initialData ? initialData.id : null);
   };
-
   return (
     <div className="modal-overlay" onClick={onCancel}>
       <form onSubmit={handleSubmit} className="modal-content" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{isEditMode ? "Modifier la demande" : "Ajouter une demande"}</h3>
-          <button type="button" className="close-button" onClick={onCancel}>&times;</button>
-        </div>
-        <div className="form-group">
-          <label htmlFor="article_id">Article <span className="required-star">*</span></label>
-          <select id="article_id" name="article_id" value={formData.article_id} onChange={handleChange} disabled={isLoading} required>
-            <option value="">Choisir l'article</option>
-            {articlesList.map(article => <option key={article.id} value={article.id}>{article.libelle}</option>)}
-          </select>
-        </div>
-        <div className="form-group">
-          <label htmlFor="quantite_demandee">Quantité <span className="required-star">*</span></label>
-          <input type="number" id="quantite_demandee" name="quantite_demandee" value={formData.quantite_demandee} onChange={handleChange} min="1" disabled={isLoading} required />
-        </div>
-        <div className="modal-footer">
-          <button type="button" className="btn btn-secondary btn-sm" onClick={onCancel} disabled={isLoading}>Annuler</button>
-          <button type="submit" className="btn btn-primary btn-sm" disabled={isLoading}>{isLoading ? "Sauvegarde..." : (isEditMode ? "Modifier" : "Ajouter")}</button>
-        </div>
+        <div className="modal-header"><h3>{isEditMode ? "Modifier la demande" : "Ajouter une demande"}</h3><button type="button" className="close-button" onClick={onCancel}>&times;</button></div>
+        <div className="form-group"><label htmlFor="article_id">Article <span className="required-star">*</span></label><select id="article_id" name="article_id" value={formData.article_id} onChange={handleChange} disabled={isLoading} required><option value="">Choisir l'article</option>{articlesList.map(article => <option key={article.id} value={article.id}>{article.libelle}</option>)}</select></div>
+        <div className="form-group"><label htmlFor="quantite_demandee">Quantité <span className="required-star">*</span></label><input type="number" id="quantite_demandee" name="quantite_demandee" value={formData.quantite_demandee} onChange={handleChange} min="1" disabled={isLoading} required /></div>
+        <div className="modal-footer"><button type="button" className="btn btn-secondary btn-sm" onClick={onCancel} disabled={isLoading}>Annuler</button><button type="submit" className="btn btn-primary btn-sm" disabled={isLoading}>{isLoading ? "Sauvegarde..." : (isEditMode ? "Modifier" : "Ajouter")}</button></div>
       </form>
     </div>
   );
@@ -105,7 +86,7 @@ const MesDemandesPageComponent = () => {
         const responseData = await response.json();
         throw new Error(responseData.message || (responseData.errors ? Object.values(responseData.errors).flat().join(' ') : 'Erreur serveur'));
       }
-      fetchData(); // Recharger la liste pour voir les changements
+      fetchData();
       showSuccessToast(`Demande ${isEditMode ? 'modifiée' : 'ajoutée'} avec succès`);
       setShowForm(false);
     } catch (err) {
@@ -167,7 +148,6 @@ const MesDemandesPageComponent = () => {
           </tbody>
         </table>
       </div>
-      <footer className="content-footer-bar">{/* Pagination et Exports */}</footer>
     </div>
   );
 };
