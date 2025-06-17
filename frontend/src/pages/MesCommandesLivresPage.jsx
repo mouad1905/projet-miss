@@ -1,8 +1,7 @@
-// frontend/src/pages/MesCommandesLivresPageComponent.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { showSuccessToast, showErrorAlert } from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
-import '../css/ConsommableList.css';// Assurez-vous que le chemin est correct
+import '../css/ConsommableList.css';
 
 const MesCommandesLivresPageComponent = () => {
   const [commandes, setCommandes] = useState([]);
@@ -11,7 +10,6 @@ const MesCommandesLivresPageComponent = () => {
   const API_BASE_URL = 'http://127.0.0.1:8000/api';
   const getToken = () => localStorage.getItem('authToken');
 
-  // Fonction pour récupérer les commandes livrées de l'utilisateur
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -33,7 +31,6 @@ const MesCommandesLivresPageComponent = () => {
     fetchData();
   }, [fetchData]);
 
-  // Fonction pour mettre à jour le statut de réception
   const handleStatusChange = async (demandeId, newStatus) => {
     try {
       const response = await fetch(`${API_BASE_URL}/demandes/${demandeId}/reception-status`, {
@@ -50,14 +47,12 @@ const MesCommandesLivresPageComponent = () => {
         throw new Error(errorData.message || 'Erreur lors de la mise à jour du statut.');
       }
       
-      // Mettre à jour l'état local pour refléter le changement immédiatement
       setCommandes(prev => prev.map(cmd => 
         cmd.id === demandeId ? { ...cmd, statut_livraison: newStatus } : cmd
       ));
       showSuccessToast('Statut de réception mis à jour !');
     } catch (err) {
       showErrorAlert(err.message);
-      // Optionnel: recharger les données pour annuler le changement visuel en cas d'erreur
       fetchData();
     }
   };
@@ -82,7 +77,6 @@ const MesCommandesLivresPageComponent = () => {
           <tbody>
             {commandes.length > 0 ? (
               commandes.map((item) => {
-                // Le menu déroulant est désactivé si un statut final a déjà été choisi
                 const isFinalStatus = item.statut_livraison === 'Reçu' || item.statut_livraison === 'Non reçu';
                 
                 return (
@@ -92,7 +86,7 @@ const MesCommandesLivresPageComponent = () => {
                       <select 
                         value={item.statut_livraison} 
                         onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                        className="table-select" // Assurez-vous que cette classe est stylée dans votre CSS
+                        className="table-select"
                         disabled={isFinalStatus}
                       >
                         <option value="Livré">En attente de réception</option>

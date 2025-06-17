@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-
-// Importez vos utilitaires et composants partagés
 import { showSuccessToast, showErrorAlert, showConfirmDialog } from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
-import '../css/ConsommableList.css';// Assurez-vous que le chemin est correct
+import '../css/ConsommableList.css';
 
-// --- Composant Formulaire ---
 const CategorieArticleForm = ({ onSave, onCancel, isLoading, initialData = null }) => {
   const [libelle, setLibelle] = useState('');
   const isEditMode = !!initialData;
@@ -54,7 +51,6 @@ const CategorieArticlePageComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pagination et recherche
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -110,7 +106,7 @@ const CategorieArticlePageComponent = () => {
         const errorMessage = responseData.message || (responseData.errors ? Object.values(responseData.errors).flat().join(' ') : `Erreur HTTP ${response.status}`);
         throw new Error(errorMessage);
       }
-      fetchData(); // Recharger les données
+      fetchData();
       showSuccessToast(`Catégorie ${isEditMode ? 'modifiée' : 'ajoutée'} avec succès`);
       setShowForm(false);
     } catch (err) {
@@ -208,7 +204,7 @@ const CategorieArticlePageComponent = () => {
           </tbody>
         </table>
       </div>
-      <footer className="content-footer-bar">{/* ... Pagination et Exports ... */}</footer>
+      <footer className="content-footer-bar"></footer>
     </div>
   );
 };

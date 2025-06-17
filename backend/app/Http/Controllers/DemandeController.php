@@ -282,5 +282,32 @@ class DemandeController extends Controller
             return response()->json(['message' => 'Erreur interne du serveur.'], 500);
         }
     }
-    
+    public function markAsDelivered(Request $request)
+    {
+        // 1. Valider les données reçues
+        // On s'assure de recevoir un tableau d'IDs valides.
+        $validator = Validator::make($request->all(), [
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:demandes,id', // Chaque ID doit exister dans la table 'demandes'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Données invalides.', 'errors' => $validator->errors()], 422);
+        }
+
+        try {
+            // 2. Mettre à jour la base de données
+            // On trouve toutes les demandes dont l'ID est dans le tableau fourni...
+            // ...et on met à jour leur colonne 'statut_livraison' à 'Livré'.
+            Demande::whereIn('id', $request->ids)->update(['statut_livraison' => 'Livré']);
+            
+            // 3. Renvoyer une réponse de succès
+            return response()->json(['message' => 'Commandes marquées comme livrées avec succès!']);
+
+        } catch (\Throwable $e) {
+            // En cas d'erreur, on l'enregistre et on renvoie une réponse d'erreur 500.
+            Log::error('Erreur dans DemandeController@markAsDelivered: ' . $e->getMessage());
+            return response()->json(['message' => 'Erreur interne du serveur lors de la mise à jour.'], 500);
+        }
+    }
 }

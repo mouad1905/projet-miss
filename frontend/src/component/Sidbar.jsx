@@ -42,7 +42,6 @@ const SidebarAndContent = ({ onLogout }) => {
   const [openSubmenus, setOpenSubmenus] = useState({ referentiel: false });
 
   const menuItems = useMemo(() => [
-    { label: "Acceuil", href: "/acceuil", icon: <FaTachometerAlt /> },
     { label: "Tableau de Bord", href: "/tableau-de-bord", icon: <FaTachometerAlt /> },
     {
       label: "Référentiel",
@@ -52,11 +51,9 @@ const SidebarAndContent = ({ onLogout }) => {
       subItems: [
         { label: "Article", href: "/referentiel/articles", icon: <FaFileAlt /> },
         { label: "Bureau", href: "/referentiel/bureaux", icon: <FaBuilding /> },
-        { label: "Catégorie de fournisseur", href: "/referentiel/categorie-fournisseur", icon: <FaTags /> },
         { label: "Division", href: "/referentiel/divisions", icon: <FaUsers /> },
         { label: "Fournisseur", href: "/referentiel/fournisseurs", icon: <FaTruckMoving /> },
         { label: "Catégorie d'article", href: "/referentiel/categorie-article", icon: <FaBoxOpen /> },
-        { label: "Catégorie de consommable", href: "/referentiel/categorie-consommable", icon: <FaTags /> },
         { label: "Catégorie d'employer", href: "/referentiel/type-employeur", icon: <FaUsers /> },
         { label: "Service", href: "/referentiel/services", icon: <FaServicestack /> },
         { label: "Utilisateur", href: "/referentiel/utilisateur", icon: <FaUserCircle /> },
@@ -160,9 +157,7 @@ const SidebarAndContent = ({ onLogout }) => {
 
       <main style={{ flexGrow: 1, padding: '20px', backgroundColor: '#f0f2f5', marginLeft: '260px' }}>
         <Routes>
-          <Route path="/tableau-de-bord" element={<TableauDeBordPage />} />
           <Route path="/acceuil" element={<TableauDeBordPage />} />
-
           {/* Référentiel */}
           <Route path="/referentiel/articles" element={<ArticleListPage />} />
           <Route path="/referentiel/bureaux" element={<BureauPageComponent />} />
@@ -172,9 +167,6 @@ const SidebarAndContent = ({ onLogout }) => {
           <Route path="/referentiel/type-employeur" element={<TypeEmployeurPageComponent />} />
           <Route path="/referentiel/services" element={<ServicePageComponent />} />
           <Route path="/referentiel/utilisateur" element={<UserManagementPage />} />
-          <Route path="/referentiel/categorie-fournisseur" element={<PlaceholderPage title="Catégorie de Fournisseur" />} />
-          <Route path="/referentiel/categorie-consommable" element={<PlaceholderPage title="Catégorie de Consommable" />} />
-
           {/* Autres pages */}
           <Route path="/generation-qr" element={<PlaceholderPage title="Génération QR" />} />
           <Route path="/mes-demandes" element={<MesDemandesPageComponent />} />

@@ -342,3 +342,16 @@ tr:hover {
   cursor: not-allowed;
   opacity: 0.65;
 }
+.status-badge.status-livré {
+  background-color: #17a2b8; /* Bleu-vert (info) */
+}
+.status-badge.status-reçu {
+  background-color: #28a745; /* Vert (success) */
+}
+.status-badge.status-non-reçu {
+  background-color: #dc3545; /* Rouge (danger) */
+}
+.status-badge.status-en-attente-de-livraison {
+    background-color: #ffc107; /* Jaune (warning) */
+    color: #212529;
+}

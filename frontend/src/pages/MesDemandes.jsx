@@ -1,11 +1,9 @@
-// frontend/src/pages/MesDemandesPageComponent.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { showSuccessToast, showErrorAlert, showConfirmDialog } from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
-import '../css/ConsommableList.css'; // Assurez-vous que ce chemin est correct
-import '../css/DemandeForm.css'; 
+import '../css/ConsommableList.css';
+import '../css/DemandeForm.css';
 
-// --- Formulaire de Demande (sans Observation) ---
 const DemandeForm = ({ onSave, onCancel, isLoading, initialData = null, articlesList = [] }) => {
   const [formData, setFormData] = useState({ article_id: '', quantite_demandee: '1' });
   const isEditMode = !!initialData;

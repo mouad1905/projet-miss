@@ -1,4 +1,3 @@
-// frontend/src/pages/LesCommandesLivresPageComponent.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { showErrorAlert, showSuccessToast} from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
@@ -56,8 +55,8 @@ const LesCommandesPageComponent = () => {
         });
         if (!response.ok) throw new Error((await response.json()).message || 'Erreur serveur.');
         showSuccessToast('Commandes marquées comme livrées !');
-        setSelectedRows(new Set()); // Vider la sélection
-        fetchData(); // Recharger la liste pour que les éléments livrés disparaissent
+        setSelectedRows(new Set());
+        fetchData();
     } catch (err) { 
         showErrorAlert(err.message); 
     } finally { 
@@ -76,7 +75,7 @@ const LesCommandesPageComponent = () => {
       <header className="content-header">
         <h1>Les Commandes à préparer</h1>
       </header>
-      <div className="controls-bar">{/* Filtres... */}</div>
+      <div className="controls-bar"></div>
       <div className="table-container">
         <table>
           <thead>
@@ -108,15 +107,11 @@ const LesCommandesPageComponent = () => {
         </table>
       </div>
       
-      {/* --- CORRECTION ICI --- */}
-      {/* Utilisation de la balise <footer> et de la classe 'content-footer-bar' pour la cohérence */}
       <footer className="content-footer-bar">
-        {/* On peut ajouter une div vide pour pousser le bouton à droite si le CSS du footer est basé sur space-between */}
         <div className="pagination-info">
           {selectedRows.size} commande(s) sélectionnée(s)
         </div>
         
-        {/* Vous pouvez ajouter la pagination ici si nécessaire */}
         <div></div>
         <div className="export-buttons">
             <button 
@@ -124,7 +119,7 @@ const LesCommandesPageComponent = () => {
               onClick={handleMarkAsDelivered} 
               disabled={isSubmitting || selectedRows.size === 0}
             >
-                {isSubmitting ? 'Envoi...' : 'Marquer comme livré'}
+              {isSubmitting ? 'Envoi...' : 'Marquer comme livré'}
             </button>
         </div>
       </footer>

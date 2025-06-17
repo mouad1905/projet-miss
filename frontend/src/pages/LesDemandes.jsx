@@ -1,8 +1,7 @@
-// frontend/src/pages/LesDemandesPageComponent.jsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { showSuccessToast, showErrorAlert } from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
-import '../css/ConsommableList.css'; // Assurez-vous que ce chemin est correct
+import '../css/ConsommableList.css';
 import '../css/DemandeForm.css'; 
 
 const LesDemandesPageComponent = () => {

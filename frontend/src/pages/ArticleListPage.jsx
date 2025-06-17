@@ -1,12 +1,9 @@
-// frontend/src/pages/ArticlePageComponent.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { showSuccessToast, showErrorAlert, showConfirmDialog } from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
 import '../css/ConsommableList.css';
 import '../css/ArticleForm.css';
 
-// --- Composant Formulaire pour Article (Modifié avec le nouveau style) ---
-// MODIFICATION 1 : La prop destructurée ici est maintenant 'articleCategories'
 const ArticleForm = ({ onSave, onCancel, isLoading, initialData = null, articleCategories = [] }) => {
   const [formData, setFormData] = useState({
     libelle: '', description: '', unite_mesure: '', cout_unitaire: '',
@@ -87,7 +84,6 @@ const ArticleForm = ({ onSave, onCancel, isLoading, initialData = null, articleC
                 <label htmlFor="article_category_id">Catégorie d'article <span className="required-star">*</span></label>
                 <select id="article_category_id" name="article_category_id" value={formData.article_category_id} onChange={handleChange} disabled={isLoading} required>
                     <option value="">Choisissez le type d'article</option>
-                    {/* Le map se fait maintenant sur 'articleCategories' qui est bien un tableau */}
                     {articleCategories.map(c => <option key={c.id} value={c.id}>{c.libelle}</option>)}
                 </select>
             </div>
@@ -119,7 +115,7 @@ const ArticleForm = ({ onSave, onCancel, isLoading, initialData = null, articleC
 
 const ArticlePageComponent = () => {
   const [data, setData] = useState([]);
-  const [articleCategories, setArticleCategories] = useState([]); // L'état est un tableau vide
+  const [articleCategories, setArticleCategories] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -150,7 +146,7 @@ const ArticlePageComponent = () => {
       }
 
       setData(await articlesRes.json());
-      setArticleCategories(await articleCatRes.json()); // Met à jour l'état du tableau
+      setArticleCategories(await articleCatRes.json());
     } catch (err) {
       showErrorAlert(err.message);
     } finally {
@@ -230,7 +226,6 @@ const ArticlePageComponent = () => {
   return (
     <div className="data-table-view">
       {showForm && (
-        // MODIFICATION 2 : On passe la prop 'articleCategories' avec le tableau directement
         <ArticleForm
           onSave={handleFormSave}
           onCancel={() => setShowForm(false)}
@@ -245,7 +240,7 @@ const ArticlePageComponent = () => {
           {isLoadingDependencies ? 'Chargement...' : '+ Ajouter un article'}
         </button>
       </header>
-      <div className="controls-bar">{/* ... Recherche et pagination ... */}</div>
+      <div className="controls-bar"></div>
       <div className="table-container">
         <table>
           <thead>
@@ -280,7 +275,7 @@ const ArticlePageComponent = () => {
           </tbody>
         </table>
       </div>
-      <footer className="content-footer-bar">{/* ... */}</footer>
+      <footer className="content-footer-bar"></footer>
     </div>
   );
 };

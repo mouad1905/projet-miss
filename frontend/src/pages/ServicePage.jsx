@@ -2,10 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 
-import "../css/ConsommableList.css"; // Assurez-vous que ce chemin est correct
-import Loader from "../component/Loader"; // Assurez-vous que le chemin est correct
+import "../css/ConsommableList.css";
+import Loader from "../component/Loader";
 
-// --- Définition du Toast SweetAlert2 ---
 const Toast = Swal.mixin({
   toast: true,
   position: 'top-end',
@@ -18,10 +17,8 @@ const Toast = Swal.mixin({
   }
 });
 
-// Définir getToken en dehors du composant pour qu'il soit stable
 const getToken = () => localStorage.getItem("authToken");
 
-// --- Composant ServiceForm ---
 const ServiceForm = ({ onSave, onCancel, isLoading, initialData = null, divisionsList = [] }) => {
   const [libelle, setLibelle] = useState("");
   const [divisionId, setDivisionId] = useState("");
@@ -105,14 +102,12 @@ const ServiceForm = ({ onSave, onCancel, isLoading, initialData = null, division
   );
 };
 
-// Styles pour le formulaire (À METTRE DANS VOTRE FICHIER CSS PARTAGÉ ou un fichier dédié)
 const formContainerStyle = { position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 };
 const formStyle = { background: "white", padding: "30px", borderRadius: "8px", boxShadow: "0 5px 15px rgba(0,0,0,0.3)", width: "450px", maxWidth: "90%" };
 const formGroupStyle = { marginBottom: "15px" };
 const labelStyle = { display: "block", marginBottom: "5px", fontWeight: "bold" };
 const inputStyle = { width: "100%", padding: "10px", border: "1px solid #ccc", borderRadius: "4px", boxSizing: "border-box" };
 const formActionsStyle = { marginTop: "20px", textAlign: "right" };
-// --- Fin Composant ServiceForm ---
 
 const ServicePageComponent = () => {
     const [data, setData] = useState([]);
@@ -278,7 +273,7 @@ const ServicePageComponent = () => {
           </div>
         );
     }
-  
+ 
     return (
         <div className="data-table-view">
             {showForm && (
@@ -314,17 +309,14 @@ const ServicePageComponent = () => {
                 <table>
                     <thead><tr><th>Libellé <span className="sort-arrow">↕</span></th><th>Division <span className="sort-arrow">↕</span></th><th>Modifier <span className="sort-arrow">↕</span></th><th>Effacer <span className="sort-arrow">↕</span></th></tr></thead>
                     
-                    {/* --- CORRECTION ICI --- */}
                     <tbody>
                         {isLoading ? (
-                            // Si la page est en train de charger (initialement ou rechargement), afficher le loader
                             <tr>
                                 <td colSpan="4">
                                     <Loader />
                                 </td>
                             </tr>
                         ) : currentItems.length > 0 ? (
-                            // Si le chargement est terminé et qu'il y a des données, les afficher
                             currentItems.map((item) => (
                                 <tr key={item.id}>
                                     <td>{item.libelle}</td>
@@ -342,7 +334,6 @@ const ServicePageComponent = () => {
                                 </tr>
                             ))
                         ) : (
-                            // Si le chargement est terminé et qu'il n'y a pas de données
                             <tr>
                                 <td colSpan="4" style={{ textAlign: "center" }}>
                                     Aucun service à afficher.
@@ -354,7 +345,7 @@ const ServicePageComponent = () => {
             </div>
              <footer className="content-footer-bar">
                 <div className="pagination-info">Affichage de l'élément {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} à {Math.min(currentPage * itemsPerPage, filteredData.length)} sur {filteredData.length} éléments</div>
-                <div className="pagination-controls">{/* ... pagination ... */}</div>
+                <div className="pagination-controls"></div>
                 <div className="export-buttons"><button className="btn btn-secondary btn-sm">Export PDF</button><button className="btn btn-secondary btn-sm">Export Excel</button></div>
             </footer>
         </div>

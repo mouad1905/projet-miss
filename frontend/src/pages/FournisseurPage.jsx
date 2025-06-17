@@ -1,10 +1,8 @@
-// frontend/src/pages/FournisseurPageComponent.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { showSuccessToast, showErrorAlert, showConfirmDialog } from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
 import '../css/ConsommableList.css';
 
-// --- Composant Formulaire ---
 const FournisseurForm = ({ onSave, onCancel, isLoading, initialData = null }) => {
   const [formData, setFormData] = useState({
     nom_entreprise: '',
@@ -131,7 +129,7 @@ const FournisseurPageComponent = () => {
         const errorMessage = responseData.message || (responseData.errors ? Object.values(responseData.errors).flat().join(' ') : `Erreur HTTP ${response.status}`);
         throw new Error(errorMessage);
       }
-      fetchData(); // Recharger les données
+      fetchData();
       showSuccessToast(`Fournisseur ${isEditMode ? 'modifié' : 'ajouté'} avec succès`);
       setShowForm(false);
     } catch (err) {
@@ -196,7 +194,7 @@ const FournisseurPageComponent = () => {
           + Ajouter un fournisseur
         </button>
       </header>
-      <div className="controls-bar">{/* ... */}</div>
+      <div className="controls-bar"></div>
       <div className="table-container">
         <table>
           <thead>
@@ -229,7 +227,7 @@ const FournisseurPageComponent = () => {
           </tbody>
         </table>
       </div>
-      <footer className="content-footer-bar">{/* ... */}</footer>
+      <footer className="content-footer-bar"></footer>
     </div>
   );
 };

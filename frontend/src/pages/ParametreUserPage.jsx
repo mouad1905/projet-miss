@@ -1,18 +1,15 @@
-// frontend/src/components/AccountSettingsComponent.jsx
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext'; // Pour récupérer l'utilisateur actuel et son token
-import { showSuccessToast, showErrorAlert } from '../utils/SwalAlerts'; // Pour de belles notifications
-import '../css/ParametreUserPage.css'; // Styles spécifiques pour ce composant
+import { useAuth } from '../context/AuthContext';
+import { showSuccessToast, showErrorAlert } from '../utils/SwalAlerts';
+import '../css/ParametreUserPage.css';
 import Loader from '../component/Loader';
 
 const AccountSettingsComponent = () => {
-  const { user, token, fetchUser } = useAuth(); // Récupérer la fonction pour rafraîchir les données utilisateur
-  const API_BASE_URL = 'http://127.0.0.1:8000/api'; // Adaptez si nécessaire
+  const { user, token, fetchUser } = useAuth();
+  const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
-  // Détails du compte
   const [username, setUsername] = useState('');
 
-  // Sécurité - Changement de mot de passe
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -20,14 +17,12 @@ const AccountSettingsComponent = () => {
   const [isLoadingUsername, setIsLoadingUsername] = useState(false);
   const [isLoadingPassword, setIsLoadingPassword] = useState(false);
 
-  // Pré-remplir le champ avec les informations de l'utilisateur connecté
   useEffect(() => {
     if (user) {
       setUsername(user.nom_utilisateur || '');
     }
   }, [user]);
 
-  // Fonction pour mettre à jour le nom d'utilisateur
   const handleUpdateUsername = async (e) => {
     e.preventDefault();
     if (username === user.nom_utilisateur) {
@@ -54,7 +49,7 @@ const AccountSettingsComponent = () => {
       }
       
       showSuccessToast('Nom d\'utilisateur mis à jour avec succès !');
-      fetchUser(token); // Rafraîchit les données utilisateur dans le contexte global
+      fetchUser(token);
 
     } catch (error) {
       console.error("Erreur lors de la mise à jour du nom d'utilisateur:", error);
@@ -64,7 +59,6 @@ const AccountSettingsComponent = () => {
     }
   };
 
-  // Fonction pour changer le mot de passe
   const handleChangePassword = async (e) => {
     e.preventDefault();
 
@@ -101,7 +95,6 @@ const AccountSettingsComponent = () => {
       }
       
       showSuccessToast('Mot de passe changé avec succès !');
-      // Vider les champs après succès
       setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
@@ -120,7 +113,6 @@ const AccountSettingsComponent = () => {
 
   return (
     <div className="account-settings-container">
-      {/* Section Détails du compte */}
       <div className="settings-section">
         <h3>Détails du compte</h3>
         <form onSubmit={handleUpdateUsername} className="settings-form">
@@ -144,7 +136,6 @@ const AccountSettingsComponent = () => {
         </form>
       </div>
 
-      {/* Section Sécurité */}
       <div className="settings-section">
         <h3>Sécurité</h3>
         <form onSubmit={handleChangePassword} className="settings-form">

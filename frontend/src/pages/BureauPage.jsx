@@ -2,12 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
-// Importations des utilitaires et styles
-import { showSuccessToast, showErrorAlert, showConfirmDialog } from '../utils/SwalAlerts'; // Assurez-vous que le chemin est correct
-import Loader from '../component/Loader'; // Assurez-vous que le chemin est correct
-import '../css/ConsommableList.css'; // Votre CSS partagé
+import { showSuccessToast, showErrorAlert, showConfirmDialog } from '../utils/SwalAlerts';
+import Loader from '../component/Loader';
+import '../css/ConsommableList.css';
 
-// --- Composant BureauForm ---
 const BureauForm = ({ onSave, onCancel, isLoading, initialData = null, divisionsList = [], servicesList = [] }) => {
   const [libelle, setLibelle] = useState('');
   const [abreviation, setAbreviation] = useState('');
@@ -16,14 +14,12 @@ const BureauForm = ({ onSave, onCancel, isLoading, initialData = null, divisions
   
   const isEditMode = !!initialData;
 
-  // Filtrer les services basés sur la division sélectionnée
   const filteredServices = divisionId ? servicesList.filter(s => s.division_id == divisionId) : [];
 
   useEffect(() => {
     if (isEditMode && initialData) {
       setLibelle(initialData.libelle || '');
       setAbreviation(initialData.abreviation || '');
-      // Pré-remplir la division et le service
       const initialService = initialData.service;
       if (initialService) {
         setDivisionId(initialService.division_id || '');
@@ -33,7 +29,6 @@ const BureauForm = ({ onSave, onCancel, isLoading, initialData = null, divisions
          setServiceId('');
       }
     } else {
-      // Réinitialiser pour le mode ajout
       setLibelle('');
       setAbreviation('');
       setDivisionId('');
@@ -43,7 +38,7 @@ const BureauForm = ({ onSave, onCancel, isLoading, initialData = null, divisions
 
   const handleDivisionChange = (e) => {
     setDivisionId(e.target.value);
-    setServiceId(''); // Réinitialiser le service quand la division change
+    setServiceId('');
   };
 
   const handleSubmit = (e) => {
@@ -94,7 +89,7 @@ const BureauForm = ({ onSave, onCancel, isLoading, initialData = null, divisions
 
 
 const BureauPageComponent = () => {
-  const [data, setData] = useState([]); // Liste des bureaux
+  const [data, setData] = useState([]);
   const [divisionsList, setDivisionsList] = useState([]);
   const [servicesList, setServicesList] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -103,7 +98,6 @@ const BureauPageComponent = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingDependencies, setIsLoadingDependencies] = useState(false);
 
-  // Pagination et recherche
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -118,7 +112,6 @@ const BureauPageComponent = () => {
       const token = getToken();
       const headers = { 'Accept': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) };
       
-      // Récupérer bureaux, divisions, et services en parallèle
       const [bureauxRes, divisionsRes, servicesRes] = await Promise.all([
         fetch(`${API_BASE_URL}/bureaux`, { headers }),
         fetch(`${API_BASE_URL}/divisions`, { headers }),
@@ -179,7 +172,7 @@ const BureauPageComponent = () => {
         throw new Error(errorMessage);
       }
       
-      fetchData(); // Recharger toutes les données pour la cohérence
+      fetchData();
       showSuccessToast(`Bureau ${isEditMode ? 'modifié' : 'ajouté'} avec succès`);
       setShowForm(false);
     } catch (err) {
@@ -283,7 +276,7 @@ const BureauPageComponent = () => {
           </tbody>
         </table>
       </div>
-      <footer className="content-footer-bar">{/* ... Pagination et Exports ... */}</footer>
+      <footer className="content-footer-bar"></footer>
     </div>
   );
 };

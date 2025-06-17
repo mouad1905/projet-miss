@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-
-// Importez vos utilitaires et composants partagés
 import { showSuccessToast, showErrorAlert, showConfirmDialog } from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
-// Assurez-vous que le chemin vers le bon fichier CSS est importé
-import '../css/ConsommableList.css'; // <<<--- Assurez-vous que c'est le bon chemin vers votre CSS
+import '../css/ConsommableList.css';
 
-// --- Composant Formulaire ---
 const TypeEmployeurForm = ({ onSave, onCancel, isLoading, initialData = null }) => {
   const [libelle, setLibelle] = useState('');
   const isEditMode = !!initialData;
@@ -29,7 +25,6 @@ const TypeEmployeurForm = ({ onSave, onCancel, isLoading, initialData = null }) 
   };
 
   return (
-    // Ce formulaire utilise ses propres classes (add-form-container) qui sont dans votre CSS
     <div className="add-form-container">
       <form onSubmit={handleSubmit}>
         <h3>
@@ -56,7 +51,6 @@ const TypeEmployeurPageComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Pagination et recherche
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -112,7 +106,7 @@ const TypeEmployeurPageComponent = () => {
         const errorMessage = responseData.message || (responseData.errors ? Object.values(responseData.errors).flat().join(' ') : `Erreur HTTP ${response.status}`);
         throw new Error(errorMessage);
       }
-      fetchData(); // Recharger les données
+      fetchData();
       showSuccessToast(`Type d'employer ${isEditMode ? 'modifié' : 'ajouté'} avec succès`);
       setShowForm(false);
     } catch (err) {
@@ -158,7 +152,6 @@ const TypeEmployeurPageComponent = () => {
 
   if (isLoading && data.length === 0) {
     return (
-      // Utilisation de la classe de votre CSS existant
       <main className="main-content-consommable">
         <Loader />
       </main>
@@ -166,7 +159,6 @@ const TypeEmployeurPageComponent = () => {
   }
 
   return (
-    // Utilisation de la classe de votre CSS existant
     <main className="main-content-consommable">
       {showForm && (
         <TypeEmployeurForm
@@ -206,7 +198,6 @@ const TypeEmployeurPageComponent = () => {
               currentItems.map((item) => (
                 <tr key={item.id}>
                   <td>{item.libelle}</td>
-                  {/* Utilisation des classes CSS correctes pour les boutons */}
                   <td><button className="btn btn-success btn-sm" onClick={() => handleOpenEditForm(item)}>Modifier</button></td>
                   <td><button className="btn btn-danger btn-sm" onClick={() => handleDeleteItem(item.id, item.libelle)}>Effacer</button></td>
                 </tr>
@@ -217,7 +208,6 @@ const TypeEmployeurPageComponent = () => {
           </tbody>
         </table>
       </div>
-      {/* Utilisation de la classe de votre CSS existant */}
       <footer className="content-footer">
         <div className="pagination-info">Affichage de l'élement 1 à {currentItems.length} sur {filteredData.length} éléments</div>
         <div className="pagination-controls">

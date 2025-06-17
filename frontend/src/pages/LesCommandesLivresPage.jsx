@@ -1,28 +1,22 @@
-// frontend/src/pages/LesCommandesLivresPageComponent.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { showErrorAlert, showSuccessToast} from '../utils/SwalAlerts';
+import { showSuccessToast, showErrorAlert } from '../utils/SwalAlerts';
 import Loader from '../component/Loader';
 import '../css/ConsommableList.css';
 
-const LesCommandesLivresPageComponent = () => {
+const MesCommandesLivresPageComponent = () => {
   const [commandes, setCommandes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedRows, setSelectedRows] = useState(new Set());
-  const [searchTerm, setSearchTerm] = useState('');
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [currentPage, setCurrentPage] = useState(1);
 
   const API_BASE_URL = 'http://127.0.0.1:8000/api';
   const getToken = () => localStorage.getItem('authToken');
 
-  // Fonction pour récupérer les commandes livrées
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/commandes-livres`, { 
+      const response = await fetch(`${API_BASE_URL}/mes-commandes-livres`, { 
         headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${getToken()}` }
       });
-      if (!response.ok) throw new Error('Erreur de chargement des commandes livrées.');
+      if (!response.ok) throw new Error('Erreur de chargement de vos commandes livrées.');
       setCommandes(await response.json());
     } catch (err) {
       showErrorAlert(err.message);
@@ -33,109 +27,61 @@ const LesCommandesLivresPageComponent = () => {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Logique pour la sélection des lignes
-  const handleRowSelect = (id) => {
-    setSelectedRows(prev => {
-      const newSelected = new Set(prev);
-      newSelected.has(id) ? newSelected.delete(id) : newSelected.add(id);
-      return newSelected;
-    });
+  const handleStatusChange = async (demandeId, newStatus) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/demandes/${demandeId}/reception-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+        body: JSON.stringify({ statut_livraison: newStatus })
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors de la mise à jour.');
+      }
+      setCommandes(prev => prev.map(cmd => cmd.id === demandeId ? { ...cmd, statut_livraison: newStatus } : cmd));
+      showSuccessToast('Statut mis à jour !');
+    } catch (err) {
+      showErrorAlert(err.message);
+      fetchData();
+    }
   };
 
-  const handleSelectAll = (e) => {
-    setSelectedRows(e.target.checked ? new Set(commandes.map(c => c.id)) : new Set());
-  };
-
-  const isAllSelected = commandes.length > 0 && selectedRows.size === commandes.length;
-
-  // Logique pour le filtrage et la pagination
-  const filteredData = commandes.filter(item =>
-    (item.article?.libelle.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (item.fournisseur?.nom_entreprise.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (item.user?.service?.libelle.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-  const currentItems = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
-
-  if (isLoading && commandes.length === 0) {
-    return <div className="data-table-view"><Loader /></div>;
-  }
+  if (isLoading) return <div className="data-table-view"><Loader /></div>;
 
   return (
     <div className="data-table-view">
-      <header className="content-header">
-        <h1>Les Commandes livrés</h1>
-        {/* Un bouton d'action pour les lignes sélectionnées pourrait être ici, ex: "Archiver" */}
-      </header>
-      <div className="controls-bar">
-        <div className="entries-selector">
-          Afficher <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}>
-            <option value="10">10</option><option value="25">25</option><option value="50">50</option>
-          </select> éléments
-        </div>
-        <div className="search-bar">
-          Rechercher: <input type="text" placeholder="Rechercher..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-        </div>
-      </div>
+      <header className="content-header"><h1>Mes Commandes livré</h1></header>
       <div className="table-container">
         <table>
-          <thead>
-            <tr>
-              <th><input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} /></th>
-              <th>QR Code</th>
-              <th>Article</th>
-              <th>Division</th>
-              <th>Service</th>
-              <th>Bureau</th>
-              <th>Fournisseur</th>
-              <th>Statut Livraison</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Article</th><th>Statut de réception</th></tr></thead>
           <tbody>
-            {isLoading ? (
-              <tr><td colSpan="8"><Loader /></td></tr>
-            ) : currentItems.length > 0 ? (
-              currentItems.map((item) => (
-                <tr key={item.id} className={selectedRows.has(item.id) ? 'selected-row' : ''}>
-                  <td><input type="checkbox" checked={selectedRows.has(item.id)} onChange={() => handleRowSelect(item.id)} /></td>
-                  <td>{item.qr_code || 'QR-' + item.id}</td>
-                  <td>{item.article?.libelle || 'N/A'}</td>
-                  <td>{item.user?.service?.division?.libelle || 'N/A'}</td>
-                  <td>{item.user?.service?.libelle || 'N/A'}</td>
-                  <td>{"Bureau X"}</td> {/* Mettez ici la bonne information si disponible */}
-                  <td>{item.fournisseur?.nom_entreprise || 'N/A'}</td>
-                  <td>
-                    <span className={`status-badge status-${item.statut_livraison?.toLowerCase().replace(/\s+/g, '-')}`}>
-                        {item.statut_livraison}
-                    </span>
-                  </td>
-                </tr>
-              ))
-            ) : ( 
-              <tr><td colSpan="8" style={{ textAlign: "center" }}>Aucune commande livrée à afficher.</td></tr> 
-            )}
+            {commandes.length > 0 ? (
+              commandes.map((item) => {
+                const isFinalStatus = item.statut_livraison === 'Reçu' || item.statut_livraison === 'Non reçu';
+                return (
+                  <tr key={item.id}>
+                    <td>{item.article?.libelle || 'N/A'}</td>
+                    <td>
+                      <select 
+                        value={item.statut_livraison} 
+                        onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                        className="table-select"
+                        disabled={isFinalStatus}
+                      >
+                        <option value="Livré">En attente de réception</option>
+                        <option value="Reçu">Reçu</option>
+                        <option value="Non reçu">Non reçu</option>
+                      </select>
+                    </td>
+                  </tr>
+                )
+              })
+            ) : ( <tr><td colSpan="2" style={{ textAlign: "center" }}>Aucune commande livrée à accuser.</td></tr> )}
           </tbody>
         </table>
       </div>
-      <footer className="content-footer-bar">
-        <div className="pagination-info">
-          Affichage de l'élément {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} à {Math.min(currentPage * itemsPerPage, filteredData.length)} sur {filteredData.length} éléments
-        </div>
-        <div className="pagination-controls">
-          <button className="btn btn-secondary btn-sm" onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>Précédent</button>
-          {[...Array(totalPages).keys()].map(number => (
-             <button key={number + 1} className={`btn btn-page btn-sm ${currentPage === number + 1 ? 'active' : ''}`} onClick={() => setCurrentPage(number + 1)}>{number + 1}</button>
-          ))}
-          <button className="btn btn-secondary btn-sm" onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>Suivant</button>
-        </div>
-        <div className="export-buttons">
-          <button className="btn btn-secondary btn-sm">Export PDF</button>
-          <button className="btn btn-secondary btn-sm">Export Excel</button>
-        </div>
-      </footer>
     </div>
   );
 };
 
-export default LesCommandesLivresPageComponent;
+export default MesCommandesLivresPageComponent;
